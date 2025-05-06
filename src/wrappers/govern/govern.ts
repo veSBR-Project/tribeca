@@ -1,14 +1,14 @@
-import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { PublicKey } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
-import type BN from "bn.js";
+import { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { PublicKey } from '@solana/web3.js';
+import { Keypair, SystemProgram } from '@solana/web3.js';
+import type BN from 'bn.js';
 
-import { DEFAULT_GOVERNANCE_PARAMETERS } from "../..";
-import type { GovernProgram, VoteData } from "../../programs/govern";
-import type { TribecaSDK } from "../../sdk";
-import { GovernorWrapper } from "./governor";
-import { findGovernorAddress } from "./pda";
-import type { PendingGovernor } from "./types";
+import { DEFAULT_GOVERNANCE_PARAMETERS } from '../..';
+import type { GovernProgram, VoteData } from '../../programs/govern';
+import type { TribecaSDK } from '../../sdk';
+import { GovernorWrapper } from './governor';
+import { findGovernorAddress } from './pda';
+import type { PendingGovernor } from './types';
 
 export class GovernWrapper {
   readonly program: GovernProgram;

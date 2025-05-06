@@ -1,20 +1,20 @@
-import type { GokiSDK, SmartWalletWrapper } from "@gokiprotocol/client";
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { PublicKey } from "@solana/web3.js";
-import { Keypair } from "@solana/web3.js";
+import type { GokiSDK, SmartWalletWrapper } from '@gokiprotocol/client';
+import type { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 
 import type {
   GovernanceParameters,
   GovernorWrapper,
   LockerParams,
-} from "../..";
+} from '../..';
 import {
   DEFAULT_GOVERNANCE_PARAMETERS,
   DEFAULT_LOCKER_PARAMS,
-} from "../../constants";
-import type { TribecaSDK } from "../../sdk";
-import { createGovernorWithElectorate } from "../govern/setup";
-import { LockerWrapper } from "./locker";
+} from '../../constants';
+import type { TribecaSDK } from '../../sdk';
+import { createGovernorWithElectorate } from '../govern/setup';
+import { LockerWrapper } from './locker';
 
 /**
  * Creates a new Locker.
@@ -59,7 +59,7 @@ export const createLocker = async ({
   }[];
 }> => {
   const { electorate, ...governor } = await createGovernorWithElectorate({
-    createElectorate: async (governorKey) => {
+    createElectorate: async governorKey => {
       const { locker, tx: tx1 } = await sdk.createLocker({
         ...lockerParams,
         baseKP: lockerBaseKP,

@@ -1,26 +1,26 @@
-import type { SmartWalletWrapper } from "@gokiprotocol/client";
-import { GokiSDK } from "@gokiprotocol/client";
-import { BN } from "@project-serum/anchor";
-import { expectTX } from "@saberhq/chai-solana";
+import type { SmartWalletWrapper } from '@gokiprotocol/client';
+import { GokiSDK } from '@gokiprotocol/client';
+import { BN } from '@project-serum/anchor';
+import { expectTX } from '@saberhq/chai-solana';
 import {
   createMint,
   getATAAddress,
   getTokenAccount,
   sleep,
-} from "@saberhq/token-utils";
-import type { PublicKey, Signer } from "@solana/web3.js";
-import { Keypair } from "@solana/web3.js";
-import { expect } from "chai";
-import invariant from "tiny-invariant";
+} from '@saberhq/token-utils';
+import type { PublicKey, Signer } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
+import { expect } from 'chai';
+import invariant from 'tiny-invariant';
 
-import { DEFAULT_GOVERNANCE_PARAMETERS } from "../src";
-import { SimpleVoterWrapper, VoteSide } from "../src/wrappers";
-import type { GovernorWrapper } from "../src/wrappers/govern/governor";
-import { findVoteAddress } from "../src/wrappers/govern/pda";
+import { DEFAULT_GOVERNANCE_PARAMETERS } from '../src';
+import { SimpleVoterWrapper, VoteSide } from '../src/wrappers';
+import type { GovernorWrapper } from '../src/wrappers/govern/governor';
+import { findVoteAddress } from '../src/wrappers/govern/pda';
 import {
   findSimpleElectorateAddress,
   findTokenRecordAddress,
-} from "../src/wrappers/simpleVoter/pda";
+} from '../src/wrappers/simpleVoter/pda';
 import {
   createUser,
   DUMMY_INSTRUCTIONS,
@@ -28,9 +28,9 @@ import {
   makeSDK,
   setupGovernor,
   ZERO,
-} from "./workspace";
+} from './workspace';
 
-describe("Simple Voter", () => {
+describe('Simple Voter', () => {
   const sdk = makeSDK();
   const gokiSDK = GokiSDK.load({ provider: sdk.provider });
 
@@ -62,7 +62,7 @@ describe("Simple Voter", () => {
       governor: governorWrapper.governorKey,
       govTokenMint,
     });
-    await expectTX(tx1, "initialize electorate").to.be.fulfilled;
+    await expectTX(tx1, 'initialize electorate').to.be.fulfilled;
 
     voterW = await SimpleVoterWrapper.load(sdk, electorate);
     governorW = governorWrapper;
@@ -72,7 +72,7 @@ describe("Simple Voter", () => {
   let proposal: PublicKey;
   let user: Signer;
 
-  beforeEach("create a proposal", async () => {
+  beforeEach('create a proposal', async () => {
     user = await createUser(sdk.provider, govTokenMint);
     const { proposal: proposalInner, tx: createProposalTx } =
       await voterW.governor.createProposal({
@@ -80,7 +80,7 @@ describe("Simple Voter", () => {
         instructions: DUMMY_INSTRUCTIONS,
       });
     createProposalTx.addSigners(user);
-    await expectTX(createProposalTx, "creating a proposal").to.be.fulfilled;
+    await expectTX(createProposalTx, 'creating a proposal').to.be.fulfilled;
     proposal = proposalInner;
   });
 
@@ -99,23 +99,23 @@ describe("Simple Voter", () => {
     expect(electorateData.governor).eqAddress(governorW.governorKey);
   });
 
-  describe("Token Record", () => {
+  describe('Token Record', () => {
     let user: Signer;
 
-    beforeEach("Create user and deposit tokens", async () => {
+    beforeEach('Create user and deposit tokens', async () => {
       user = await createUser(sdk.provider, govTokenMint);
       const depositTx = await voterW.depositTokens(
         INITIAL_MINT_AMOUNT,
         user.publicKey
       );
       depositTx.addSigners(user);
-      await expectTX(depositTx, "deposit tokens").to.be.fulfilled;
+      await expectTX(depositTx, 'deposit tokens').to.be.fulfilled;
     });
 
-    it("Token record was initialized", async () => {
+    it('Token record was initialized', async () => {
       const { electorate, electorateData } = voterW;
-      invariant(electorate, "electorate not found");
-      invariant(electorateData, "electorateData not found");
+      invariant(electorate, 'electorate not found');
+      invariant(electorateData, 'electorateData not found');
 
       const [tokenRecordKey, bump] = await findTokenRecordAddress(
         user.publicKey,
@@ -137,17 +137,17 @@ describe("Simple Voter", () => {
       );
     });
 
-    it("Withdraw tokens", async () => {
+    it('Withdraw tokens', async () => {
       const withdrawTx = await voterW.withdrawTokens(
         INITIAL_MINT_AMOUNT,
         user.publicKey
       );
       withdrawTx.addSigners(user);
-      await expectTX(withdrawTx, "withdraw tokens").to.be.fulfilled;
+      await expectTX(withdrawTx, 'withdraw tokens').to.be.fulfilled;
 
       const { electorate, electorateData } = voterW;
-      invariant(electorate, "electorate not found");
-      invariant(electorateData, "electorateData not found");
+      invariant(electorate, 'electorate not found');
+      invariant(electorateData, 'electorateData not found');
 
       const [tokenRecordKey] = await findTokenRecordAddress(
         user.publicKey,
@@ -180,43 +180,42 @@ describe("Simple Voter", () => {
     });
   });
 
-  describe("Cast votes", () => {
+  describe('Cast votes', () => {
     let user: Signer;
 
-    beforeEach("Create user and deposit tokens", async () => {
+    beforeEach('Create user and deposit tokens', async () => {
       user = await createUser(sdk.provider, govTokenMint);
       const depositTx = await voterW.depositTokens(
         INITIAL_MINT_AMOUNT,
         user.publicKey
       );
       depositTx.addSigners(user);
-      await expectTX(depositTx, "deposit tokens").to.be.fulfilled;
+      await expectTX(depositTx, 'deposit tokens').to.be.fulfilled;
 
       await sleep(3_000);
 
-      await expectTX(voterW.activateProposal(proposal), "activate proposal").to
+      await expectTX(voterW.activateProposal(proposal), 'activate proposal').to
         .be.fulfilled;
     });
 
-    it("Vote receipt was initialized properly", async () => {
+    it('Vote receipt was initialized properly', async () => {
       const tx = await voterW.castVotes({
         proposal,
         authority: user.publicKey,
         voteSide: VoteSide.For,
       });
       tx.addSigners(user);
-      await expectTX(tx, "cast for vote").to.be.fulfilled;
+      await expectTX(tx, 'cast for vote').to.be.fulfilled;
 
       const { electorate, electorateData } = voterW;
-      invariant(electorate && electorateData, "elecotrate not found");
+      invariant(electorate && electorateData, 'elecotrate not found');
 
       const [voteReceiptKey, bump] = await findVoteAddress(
         proposal,
         user.publicKey
       );
-      const voteRecipetData = await governorW.sdk.govern.fetchVote(
-        voteReceiptKey
-      );
+      const voteRecipetData =
+        await governorW.sdk.govern.fetchVote(voteReceiptKey);
       expect(voteRecipetData.bump).equal(bump);
       expect(voteRecipetData.side).equal(VoteSide.For);
       expect(voteRecipetData.proposal).eqAddress(proposal);
@@ -226,72 +225,72 @@ describe("Simple Voter", () => {
       );
     });
 
-    it("Cast for on proposal", async () => {
+    it('Cast for on proposal', async () => {
       const tx = await voterW.castVotes({
         proposal,
         authority: user.publicKey,
         voteSide: VoteSide.For,
       });
       tx.addSigners(user);
-      await expectTX(tx, "cast for votes").to.be.fulfilled;
+      await expectTX(tx, 'cast for votes').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       expect(proposalData.forVotes.toString()).eql(
         INITIAL_MINT_AMOUNT.toString()
       );
-      expect(proposalData.againstVotes.toString()).eql("0");
-      expect(proposalData.abstainVotes.toString()).eql("0");
+      expect(proposalData.againstVotes.toString()).eql('0');
+      expect(proposalData.abstainVotes.toString()).eql('0');
     });
 
-    it("Cast against on proposal", async () => {
+    it('Cast against on proposal', async () => {
       const tx = await voterW.castVotes({
         proposal,
         authority: user.publicKey,
         voteSide: VoteSide.Against,
       });
       tx.addSigners(user);
-      await expectTX(tx, "cast against votes").to.be.fulfilled;
+      await expectTX(tx, 'cast against votes').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       expect(proposalData.againstVotes.toString()).eql(
         INITIAL_MINT_AMOUNT.toString()
       );
-      expect(proposalData.forVotes.toString()).eql("0");
-      expect(proposalData.abstainVotes.toString()).eql("0");
+      expect(proposalData.forVotes.toString()).eql('0');
+      expect(proposalData.abstainVotes.toString()).eql('0');
     });
 
-    it("Cast abstain on proposal", async () => {
+    it('Cast abstain on proposal', async () => {
       const tx = await voterW.castVotes({
         proposal,
         authority: user.publicKey,
         voteSide: VoteSide.Abstain,
       });
       tx.addSigners(user);
-      await expectTX(tx, "cast abstain votes").to.be.fulfilled;
+      await expectTX(tx, 'cast abstain votes').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       expect(proposalData.abstainVotes.toString()).eql(
         INITIAL_MINT_AMOUNT.toString()
       );
-      expect(proposalData.forVotes.toString()).eql("0");
-      expect(proposalData.againstVotes.toString()).eql("0");
+      expect(proposalData.forVotes.toString()).eql('0');
+      expect(proposalData.againstVotes.toString()).eql('0');
     });
 
-    it("Cast votes on multiple proposals", async () => {
+    it('Cast votes on multiple proposals', async () => {
       const { proposal: anotherProposal, tx: createAnotherProposalTx } =
         await voterW.governor.createProposal({
           proposer: user.publicKey,
           instructions: DUMMY_INSTRUCTIONS,
         });
       createAnotherProposalTx.addSigners(user);
-      await expectTX(createAnotherProposalTx, "creating another proposal").to.be
+      await expectTX(createAnotherProposalTx, 'creating another proposal').to.be
         .fulfilled;
 
       await sleep(3_000);
 
       await expectTX(
         voterW.activateProposal(anotherProposal),
-        "activate proposal"
+        'activate proposal'
       ).to.be.fulfilled;
 
       const castForProposalTx = await voterW.castVotes({
@@ -300,15 +299,15 @@ describe("Simple Voter", () => {
         voteSide: VoteSide.For,
       });
       castForProposalTx.addSigners(user);
-      await expectTX(castForProposalTx, "cast votes for first proposal").to.be
+      await expectTX(castForProposalTx, 'cast votes for first proposal').to.be
         .fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       expect(proposalData.forVotes.toString()).eql(
         INITIAL_MINT_AMOUNT.toString()
       );
-      expect(proposalData.againstVotes.toString()).eql("0");
-      expect(proposalData.abstainVotes.toString()).eql("0");
+      expect(proposalData.againstVotes.toString()).eql('0');
+      expect(proposalData.abstainVotes.toString()).eql('0');
 
       const tx = await voterW.castVotes({
         proposal: anotherProposal,
@@ -316,19 +315,18 @@ describe("Simple Voter", () => {
         voteSide: VoteSide.For,
       });
       tx.addSigners(user);
-      await expectTX(tx, "cast votes for second proposal").to.be.fulfilled;
+      await expectTX(tx, 'cast votes for second proposal').to.be.fulfilled;
 
-      const anotherProposalData = await governorW.fetchProposalByKey(
-        anotherProposal
-      );
+      const anotherProposalData =
+        await governorW.fetchProposalByKey(anotherProposal);
       expect(anotherProposalData.forVotes.toString()).eql(
         INITIAL_MINT_AMOUNT.toString()
       );
-      expect(anotherProposalData.againstVotes.toString()).eql("0");
-      expect(anotherProposalData.abstainVotes.toString()).eql("0");
+      expect(anotherProposalData.againstVotes.toString()).eql('0');
+      expect(anotherProposalData.abstainVotes.toString()).eql('0');
     });
 
-    it("unable to cast vote after proposal voting period ends", async () => {
+    it('unable to cast vote after proposal voting period ends', async () => {
       const setGovernanceIx = await governorW.setGovernanceParamsIx({
         ...DEFAULT_GOVERNANCE_PARAMETERS,
         votingPeriod: new BN(1),
@@ -338,13 +336,13 @@ describe("Simple Voter", () => {
         payer: sdk.provider.wallet.publicKey,
         instructions: [setGovernanceIx],
       });
-      await expectTX(tx, "new smart wallet transaction").to.be.fulfilled;
+      await expectTX(tx, 'new smart wallet transaction').to.be.fulfilled;
       await expectTX(
         smartWalletW.executeTransaction({
           transactionKey,
           owner: sdk.provider.wallet.publicKey,
         }),
-        "execute transaction"
+        'execute transaction'
       ).to.be.fulfilled;
 
       const { proposal: obsoleteProposal, tx: createObsoleteProposalTx } =
@@ -353,13 +351,13 @@ describe("Simple Voter", () => {
           instructions: DUMMY_INSTRUCTIONS,
         });
       createObsoleteProposalTx.addSigners(user);
-      await expectTX(createObsoleteProposalTx, "creating an obsolete proposal")
+      await expectTX(createObsoleteProposalTx, 'creating an obsolete proposal')
         .to.be.fulfilled;
 
       await sleep(2_000);
       await expectTX(
         voterW.activateProposal(obsoleteProposal),
-        "activate proposal"
+        'activate proposal'
       ).to.be.fulfilled;
 
       // Wait for voting period to pass
@@ -371,7 +369,7 @@ describe("Simple Voter", () => {
         voteSide: VoteSide.For,
       });
       castVoteTx.addSigners(user);
-      await expectTX(castVoteTx, "cast votes for obsolete proposal").to.be
+      await expectTX(castVoteTx, 'cast votes for obsolete proposal').to.be
         .rejected;
     });
   });

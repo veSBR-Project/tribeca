@@ -4,16 +4,16 @@ solana_version = "1.9.12"
 [features]
 seeds = true
 
-[scripts]
-test = "yarn mocha -b"
-
 [provider]
 cluster = "localnet"
-wallet = "./tests/test-key.json"
+wallet = "~/.config/solana/id.json"
 
-[[test.genesis]]
-address = "GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH"
-program = "./artifacts/deploy/smart_wallet.so"
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+# [[test.genesis]]
+# address = "GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH"
+# program = "./artifacts/deploy/smart_wallet.so"
 
 [programs.localnet]
 govern = "Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw"

@@ -1,7 +1,7 @@
-import BN from "bn.js";
+import BN from 'bn.js';
 
-import type { ProposalData } from "../../programs/govern";
-import { ProposalState } from "./types";
+import type { ProposalData } from '../../programs/govern';
+import { ProposalState } from './types';
 
 /**
  * Gets the state of a proposal.

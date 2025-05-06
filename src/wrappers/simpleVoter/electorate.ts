@@ -1,28 +1,28 @@
 import {
   createMemoInstruction,
   TransactionEnvelope,
-} from "@saberhq/solana-contrib";
-import type { u64 } from "@saberhq/token-utils";
+} from '@saberhq/solana-contrib';
+import type { u64 } from '@saberhq/token-utils';
 import {
   getATAAddress,
   getOrCreateATA,
   TOKEN_PROGRAM_ID,
-} from "@saberhq/token-utils";
-import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram } from "@solana/web3.js";
-import invariant from "tiny-invariant";
+} from '@saberhq/token-utils';
+import type { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
+import invariant from 'tiny-invariant';
 
-import { TRIBECA_ADDRESSES } from "../../constants";
+import { TRIBECA_ADDRESSES } from '../../constants';
 import type {
   ElectorateData,
   ProposalData,
   SimpleVoterProgram,
   TokenRecordData,
-} from "../../programs";
-import type { TribecaSDK } from "../../sdk";
-import { GovernorWrapper } from "../govern/governor";
-import { findTokenRecordAddress } from "./pda";
-import type { VoteArgs } from "./types";
+} from '../../programs';
+import type { TribecaSDK } from '../../sdk';
+import { GovernorWrapper } from '../govern/governor';
+import { findTokenRecordAddress } from './pda';
+import type { VoteArgs } from './types';
 
 /**
  * Helper methods around a Simple Voter electorate.
@@ -70,7 +70,7 @@ export class SimpleVoterWrapper {
   }
 
   async fetchVoterMetadata(): Promise<ElectorateData> {
-    invariant(this.electorate, "electorate not set");
+    invariant(this.electorate, 'electorate not set');
     this.electorateData = await this.program.account.electorate.fetch(
       this.electorate
     );
@@ -83,7 +83,7 @@ export class SimpleVoterWrapper {
     tokenRecord: PublicKey;
     instruction: TransactionInstruction | null;
   }> {
-    invariant(this.electorate, "electorate not set");
+    invariant(this.electorate, 'electorate not set');
 
     const [tokenRecord] = await findTokenRecordAddress(
       authority,
@@ -105,7 +105,7 @@ export class SimpleVoterWrapper {
     amount: u64,
     authority: PublicKey = this.sdk.provider.wallet.publicKey
   ): Promise<TransactionEnvelope> {
-    invariant(this.electorate, "electorate not set");
+    invariant(this.electorate, 'electorate not set');
 
     const { tokenRecord, instruction: initTokenRecordIx } =
       await this.getOrCreateTokenRecord(authority);
@@ -133,8 +133,8 @@ export class SimpleVoterWrapper {
     amount: u64,
     authority: PublicKey
   ): Promise<TransactionEnvelope> {
-    invariant(this.electorate, "electorate not set");
-    invariant(this.electorateData, "electorate data not loaded");
+    invariant(this.electorate, 'electorate not set');
+    invariant(this.electorateData, 'electorate data not loaded');
 
     const [tokenRecord] = await findTokenRecordAddress(
       authority,
@@ -170,7 +170,7 @@ export class SimpleVoterWrapper {
   }
 
   async castVotes(args: VoteArgs): Promise<TransactionEnvelope> {
-    invariant(this.electorateData, "electorate data not loaded");
+    invariant(this.electorateData, 'electorate data not loaded');
     const {
       authority = this.provider.wallet.publicKey,
       proposal,
@@ -216,7 +216,7 @@ export class SimpleVoterWrapper {
     proposal: PublicKey,
     authority: PublicKey = this.sdk.provider.wallet.publicKey
   ): Promise<TransactionEnvelope> {
-    invariant(this.electorateData, "electorate data not loaded");
+    invariant(this.electorateData, 'electorate data not loaded');
 
     const ixs: TransactionInstruction[] = [];
     const { tokenRecord, instruction: tokenRecordIx } =
@@ -306,8 +306,8 @@ export class SimpleVoterWrapper {
   async initializeTokenRecordIx(
     authority: PublicKey = this.sdk.provider.wallet.publicKey
   ): Promise<TransactionInstruction> {
-    invariant(this.electorate, "electorate not set");
-    invariant(this.electorateData, "electorate data not loaded");
+    invariant(this.electorate, 'electorate not set');
+    invariant(this.electorateData, 'electorate data not loaded');
 
     const [tokenRecord, bump] = await findTokenRecordAddress(
       authority,
@@ -356,7 +356,7 @@ export class SimpleVoterWrapper {
   }
 
   private _genTribecaContext(): { governor: PublicKey; program: PublicKey } {
-    invariant(this.electorateData, "electrate data not loaded");
+    invariant(this.electorateData, 'electrate data not loaded');
     return {
       governor: this.electorateData.governor,
       program: TRIBECA_ADDRESSES.Govern,
@@ -371,7 +371,7 @@ export class SimpleVoterWrapper {
     govTokenVault: PublicKey;
     instructions: TransactionInstruction[];
   }> {
-    invariant(this.electorateData, "electorate data not loaded");
+    invariant(this.electorateData, 'electorate data not loaded');
 
     const { provider } = this.sdk;
 

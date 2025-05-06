@@ -2,12 +2,12 @@ import {
   findTransactionAddress,
   GOKI_ADDRESSES,
   GOKI_CODERS,
-} from "@gokiprotocol/client";
-import { TransactionEnvelope } from "@saberhq/solana-contrib";
-import { u64 } from "@saberhq/token-utils";
-import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram } from "@solana/web3.js";
-import type BN from "bn.js";
+} from '@gokiprotocol/client';
+import { TransactionEnvelope } from '@saberhq/solana-contrib';
+import { u64 } from '@saberhq/token-utils';
+import type { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
+import type BN from 'bn.js';
 
 import type {
   GovernanceParameters,
@@ -15,14 +15,14 @@ import type {
   ProposalData,
   ProposalInstruction,
   ProposalMetaData,
-} from "../../programs/govern";
-import type { TribecaSDK } from "../../sdk";
-import type { PendingProposal } from "../simpleVoter/types";
+} from '../../programs/govern';
+import type { TribecaSDK } from '../../sdk';
+import type { PendingProposal } from '../simpleVoter/types';
 import {
   findProposalAddress,
   findProposalMetaAddress,
   findVoteAddress,
-} from "./pda";
+} from './pda';
 
 /**
  * Wrapper around a Governor.
@@ -30,7 +30,10 @@ import {
 export class GovernorWrapper {
   private _governor: GovernorData | null = null;
 
-  constructor(readonly sdk: TribecaSDK, readonly governorKey: PublicKey) {}
+  constructor(
+    readonly sdk: TribecaSDK,
+    readonly governorKey: PublicKey
+  ) {}
 
   get provider() {
     return this.sdk.provider;
@@ -164,7 +167,7 @@ export class GovernorWrapper {
         governorData.smartWallet
       );
     if (!smartWalletDataRaw) {
-      throw new Error("smart wallet not found");
+      throw new Error('smart wallet not found');
     }
     const smartWalletData = GOKI_CODERS.SmartWallet.accountParsers.smartWallet(
       smartWalletDataRaw.data

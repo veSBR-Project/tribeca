@@ -1,8 +1,8 @@
-import type { AnchorTypes } from "@saberhq/anchor-contrib";
+import type { AnchorTypes } from '@saberhq/anchor-contrib';
 
-import type { SimpleVoterIDL } from "../idls/simple_voter";
+import type { SimpleVoterIDL } from '../idls/simple_voter';
 
-export * from "../idls/simple_voter";
+export * from '../idls/simple_voter';
 
 export type SimpleVoterTypes = AnchorTypes<
   SimpleVoterIDL,
@@ -12,8 +12,8 @@ export type SimpleVoterTypes = AnchorTypes<
   }
 >;
 
-type Accounts = SimpleVoterTypes["Accounts"];
-export type ElectorateData = Accounts["Electorate"];
-export type TokenRecordData = Accounts["TokenRecord"];
+type Accounts = SimpleVoterTypes['Accounts'];
+export type ElectorateData = Accounts['Electorate'];
+export type TokenRecordData = Accounts['TokenRecord'];
 
-export type SimpleVoterProgram = SimpleVoterTypes["Program"];
+export type SimpleVoterProgram = SimpleVoterTypes['Program'];

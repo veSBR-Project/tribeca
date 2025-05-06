@@ -1,19 +1,19 @@
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { TokenAmount } from "@saberhq/token-utils";
+import type { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { TokenAmount } from '@saberhq/token-utils';
 import {
   getATAAddress,
   getOrCreateATA,
   TOKEN_PROGRAM_ID,
-} from "@saberhq/token-utils";
-import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { SystemProgram } from "@solana/web3.js";
-import BN from "bn.js";
+} from '@saberhq/token-utils';
+import type { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { SystemProgram } from '@solana/web3.js';
+import BN from 'bn.js';
 
-import { TRIBECA_ADDRESSES } from "../../constants";
-import type { EscrowData, LockerData } from "../../programs/lockedVoter";
-import type { TribecaSDK } from "../../sdk";
-import { findVoteAddress } from "../govern/pda";
-import type { VoteSide } from "../govern/types";
+import { TRIBECA_ADDRESSES } from '../../constants';
+import type { EscrowData, LockerData } from '../../programs/lockedVoter';
+import type { TribecaSDK } from '../../sdk';
+import { findVoteAddress } from '../govern/pda';
+import type { VoteSide } from '../govern/types';
 
 export class VoteEscrow {
   private _lockerData: LockerData | null = null;

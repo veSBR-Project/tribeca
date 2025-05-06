@@ -1,10 +1,10 @@
-import { utils } from "@project-serum/anchor";
-import type { u64 } from "@saberhq/token-utils";
-import { PublicKey } from "@solana/web3.js";
+import { utils } from '@project-serum/anchor';
+import type { u64 } from '@saberhq/token-utils';
+import { PublicKey } from '@solana/web3.js';
 
-import { TRIBECA_ADDRESSES } from "../../constants";
+import { TRIBECA_ADDRESSES } from '../../constants';
 
-export * from "./pdaSync";
+export * from './pdaSync';
 
 /**
  * Finds the PDA of a Governor.
@@ -13,7 +13,7 @@ export const findGovernorAddress = async (
   base: PublicKey
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
-    [utils.bytes.utf8.encode("TribecaGovernor"), base.toBuffer()],
+    [utils.bytes.utf8.encode('TribecaGovernor'), base.toBuffer()],
     TRIBECA_ADDRESSES.Govern
   );
 };
@@ -27,9 +27,9 @@ export const findProposalAddress = async (
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
-      utils.bytes.utf8.encode("TribecaProposal"),
+      utils.bytes.utf8.encode('TribecaProposal'),
       governorKey.toBuffer(),
-      index.toArrayLike(Buffer, "le", 8),
+      index.toArrayLike(Buffer, 'le', 8),
     ],
     TRIBECA_ADDRESSES.Govern
   );
@@ -47,7 +47,7 @@ export const findVoteAddress = async (
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
-      utils.bytes.utf8.encode("TribecaVote"),
+      utils.bytes.utf8.encode('TribecaVote'),
       proposalKey.toBuffer(),
       voterKey.toBuffer(),
     ],
@@ -64,7 +64,7 @@ export const findProposalMetaAddress = async (
   proposalKey: PublicKey
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
-    [utils.bytes.utf8.encode("TribecaProposalMeta"), proposalKey.toBuffer()],
+    [utils.bytes.utf8.encode('TribecaProposalMeta'), proposalKey.toBuffer()],
     TRIBECA_ADDRESSES.Govern
   );
 };

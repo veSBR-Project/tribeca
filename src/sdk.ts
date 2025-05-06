@@ -1,24 +1,24 @@
-import type { BN } from "@project-serum/anchor";
-import { newProgramMap } from "@saberhq/anchor-contrib";
-import type { AugmentedProvider, Provider } from "@saberhq/solana-contrib";
+import type { BN } from '@project-serum/anchor';
+import { newProgramMap } from '@saberhq/anchor-contrib';
+import type { AugmentedProvider, Provider } from '@saberhq/solana-contrib';
 import {
   SolanaAugmentedProvider,
   TransactionEnvelope,
-} from "@saberhq/solana-contrib";
-import type { PublicKey, Signer } from "@solana/web3.js";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+} from '@saberhq/solana-contrib';
+import type { PublicKey, Signer } from '@solana/web3.js';
+import { Keypair, SystemProgram } from '@solana/web3.js';
 
-import type { TribecaPrograms } from "./constants";
+import type { TribecaPrograms } from './constants';
 import {
   DEFAULT_LOCKER_PARAMS,
   TRIBECA_ADDRESSES,
   TRIBECA_IDLS,
-} from "./constants";
-import type { LockerParams } from "./programs/lockedVoter";
-import { GovernWrapper } from "./wrappers";
-import { findLockerAddress } from "./wrappers/lockedVoter/pda";
-import { findSimpleElectorateAddress } from "./wrappers/simpleVoter/pda";
-import type { PendingElectorate } from "./wrappers/simpleVoter/types";
+} from './constants';
+import type { LockerParams } from './programs/lockedVoter';
+import { GovernWrapper } from './wrappers';
+import { findLockerAddress } from './wrappers/lockedVoter/pda';
+import { findSimpleElectorateAddress } from './wrappers/simpleVoter/pda';
+import type { PendingElectorate } from './wrappers/simpleVoter/types';
 
 /**
  * TribecaSDK.

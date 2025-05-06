@@ -132,6 +132,13 @@ pub mod locked_voter {
     pub fn revoke_program_lock_privilege(ctx: Context<RevokeProgramLockPrivilege>) -> Result<()> {
         ctx.accounts.revoke_program_lock_privilege()
     }
+
+    /// Instantly withdraws all tokens from an [Escrow] before the lock period ends,
+    /// mints a receipt token to the user, and sends the withdrawn tokens to the treasury.
+    #[access_control(ctx.accounts.validate())]
+    pub fn instant_withdraw(ctx: Context<InstantWithdraw>, amount: u64) -> Result<()> {
+        ctx.accounts.instant_withdraw(amount)
+    }
 }
 
 /// [locked_voter] errors.

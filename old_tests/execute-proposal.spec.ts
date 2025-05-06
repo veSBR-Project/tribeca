@@ -1,30 +1,31 @@
-import type { SmartWalletWrapper } from "@gokiprotocol/client";
-import { findTransactionAddress, GokiSDK } from "@gokiprotocol/client";
-import { expectTX } from "@saberhq/chai-solana";
-import type { u64 } from "@saberhq/token-utils";
-import { createMint, sleep } from "@saberhq/token-utils";
-import type { PublicKey, Signer } from "@solana/web3.js";
-import { Keypair } from "@solana/web3.js";
-import { BN } from "bn.js";
-import { expect } from "chai";
+import type { SmartWalletWrapper } from '@gokiprotocol/client';
+import { findTransactionAddress, GokiSDK } from '@gokiprotocol/client';
+import { expectTX } from '@saberhq/chai-solana';
+import type { u64 } from '@saberhq/token-utils';
+import { createMint, sleep } from '@saberhq/token-utils';
+import type { PublicKey, Signer } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
+import { BN } from 'bn.js';
+import { expect } from 'chai';
 
-import type { GovernorWrapper } from "../src";
+import type { GovernorWrapper } from '../src';
+
 import {
   DEFAULT_GOVERNANCE_PARAMETERS,
   findGovernorAddress,
   findSimpleElectorateAddress,
   SimpleVoterWrapper,
   VoteSide,
-} from "../src";
+} from '../src';
 import {
   createUser,
   INITIAL_MINT_AMOUNT,
   makeSDK,
   ONE,
   ZERO,
-} from "./workspace";
+} from './workspace';
 
-describe("Execute proposal", () => {
+describe('Execute proposal', () => {
   const sdk = makeSDK();
   const { provider } = sdk;
   const gokiSDK = GokiSDK.load({ provider });
@@ -34,7 +35,7 @@ describe("Execute proposal", () => {
   let smartWalletW: SmartWalletWrapper;
   let voterW: SimpleVoterWrapper;
 
-  before("Set up", async () => {
+  before('Set up', async () => {
     govTokenMint = await createMint(provider);
 
     const electorateBase = Keypair.generate();
@@ -50,7 +51,7 @@ describe("Execute proposal", () => {
       threshold: ONE,
       numOwners: owners.length,
     });
-    await expectTX(tx1, "create smart wallet").to.be.fulfilled;
+    await expectTX(tx1, 'create smart wallet').to.be.fulfilled;
 
     const { wrapper, tx: tx2 } = await sdk.govern.createGovernor({
       baseKP: govBase,
@@ -60,7 +61,7 @@ describe("Execute proposal", () => {
       votingDelay: ZERO,
       votingPeriod: new BN(2),
     });
-    await expectTX(tx2, "create governor").to.be.fulfilled;
+    await expectTX(tx2, 'create governor').to.be.fulfilled;
 
     const { electorate, tx: tx3 } = await sdk.createSimpleElectorate({
       baseKP: electorateBase,
@@ -68,7 +69,7 @@ describe("Execute proposal", () => {
       governor,
       govTokenMint,
     });
-    await expectTX(tx3, "initialize electorate").to.be.fulfilled;
+    await expectTX(tx3, 'initialize electorate').to.be.fulfilled;
 
     voterW = await SimpleVoterWrapper.load(sdk, electorate);
     governorW = wrapper;
@@ -79,7 +80,7 @@ describe("Execute proposal", () => {
   let proposal: PublicKey;
   let proposalIndex: u64;
 
-  beforeEach("create and activate a proposal", async () => {
+  beforeEach('create and activate a proposal', async () => {
     user1 = await createUser(provider, govTokenMint);
     const {
       proposal: proposalInner,
@@ -92,14 +93,14 @@ describe("Execute proposal", () => {
       ],
     });
     createProposalTx.addSigners(user1);
-    await expectTX(createProposalTx, "creating a proposal").to.be.fulfilled;
-    await expectTX(voterW.activateProposal(proposalInner), "activate proposal")
+    await expectTX(createProposalTx, 'creating a proposal').to.be.fulfilled;
+    await expectTX(voterW.activateProposal(proposalInner), 'activate proposal')
       .to.be.fulfilled;
     proposal = proposalInner;
     proposalIndex = index;
   });
 
-  it("Happy path", async () => {
+  it('Happy path', async () => {
     let governorData = await governorW.data();
     const tx1 = await voterW.depositTokenAndCastVote({
       voteSide: VoteSide.For,
@@ -108,18 +109,18 @@ describe("Execute proposal", () => {
       amount: governorData.params.quorumVotes,
     });
     tx1.addSigners(user1);
-    await expectTX(tx1, "deposit tokens and cast votes").to.be.fulfilled;
+    await expectTX(tx1, 'deposit tokens and cast votes').to.be.fulfilled;
     await sleep(2_500);
     const tx3 = await governorW.queueProposal({
       index: proposalIndex,
     });
-    await expectTX(tx3, "queue proposal for execution").to.be.fulfilled;
+    await expectTX(tx3, 'queue proposal for execution').to.be.fulfilled;
 
     const [transactionKey] = await findTransactionAddress(smartWalletW.key, 0);
     const tx4 = await smartWalletW.executeTransaction({
       transactionKey,
     });
-    await expectTX(tx4, "execute the transaction via the smart wallet").to.be
+    await expectTX(tx4, 'execute the transaction via the smart wallet').to.be
       .fulfilled;
 
     governorData = await governorW.reload();

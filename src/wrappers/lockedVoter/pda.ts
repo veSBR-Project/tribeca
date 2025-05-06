@@ -1,15 +1,15 @@
-import { utils } from "@project-serum/anchor";
-import { PublicKey, SystemProgram } from "@solana/web3.js";
+import { utils } from '@project-serum/anchor';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
 
-import { TRIBECA_ADDRESSES } from "../../constants";
+import { TRIBECA_ADDRESSES } from '../../constants';
 
-export * from "./pdaSync";
+export * from './pdaSync';
 
 export const findLockerAddress = async (
   base: PublicKey
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
-    [utils.bytes.utf8.encode("Locker"), base.toBuffer()],
+    [utils.bytes.utf8.encode('Locker'), base.toBuffer()],
     TRIBECA_ADDRESSES.LockedVoter
   );
 };
@@ -20,7 +20,7 @@ export const findEscrowAddress = async (
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
-      utils.bytes.utf8.encode("Escrow"),
+      utils.bytes.utf8.encode('Escrow'),
       locker.toBuffer(),
       authority.toBuffer(),
     ],
@@ -35,7 +35,7 @@ export const findWhitelistAddress = async (
 ): Promise<[PublicKey, number]> => {
   return await PublicKey.findProgramAddress(
     [
-      utils.bytes.utf8.encode("LockerWhitelistEntry"),
+      utils.bytes.utf8.encode('LockerWhitelistEntry'),
       locker.toBuffer(),
       programId.toBuffer(),
       owner ? owner.toBuffer() : SystemProgram.programId.toBuffer(),

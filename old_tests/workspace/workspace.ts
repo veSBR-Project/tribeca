@@ -1,32 +1,32 @@
-import type { GokiSDK } from "@gokiprotocol/client";
-import type { SmartWalletWrapper } from "@gokiprotocol/client/dist/cjs/wrappers/smartWallet";
-import { AnchorProvider } from "@project-serum/anchor";
-import * as anchor from "@project-serum/anchor";
-import { chaiSolana, expectTX } from "@saberhq/chai-solana";
-import type { Provider } from "@saberhq/solana-contrib";
+import type { GokiSDK } from '@gokiprotocol/client';
+import type { SmartWalletWrapper } from '@gokiprotocol/client/dist/cjs/wrappers/smartWallet';
+import { AnchorProvider } from '@project-serum/anchor';
+import * as anchor from '@project-serum/anchor';
+import { chaiSolana, expectTX } from '@saberhq/chai-solana';
+import type { Provider } from '@saberhq/solana-contrib';
 import {
   SolanaAugmentedProvider,
   SolanaProvider,
   TransactionEnvelope,
-} from "@saberhq/solana-contrib";
+} from '@saberhq/solana-contrib';
 import {
   getOrCreateATA,
   SPLToken,
   TOKEN_PROGRAM_ID,
   u64,
-} from "@saberhq/token-utils";
-import type { PublicKey, Signer } from "@solana/web3.js";
+} from '@saberhq/token-utils';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import {
   Keypair,
   LAMPORTS_PER_SOL,
   TransactionInstruction,
-} from "@solana/web3.js";
-import chai from "chai";
+} from '@solana/web3.js';
+import chai from 'chai';
 
-import type { TribecaPrograms } from "../../src";
-import { TribecaSDK } from "../../src";
-import type { GovernorWrapper } from "../../src/wrappers/govern/governor";
-import { findGovernorAddress } from "../../src/wrappers/govern/pda";
+import type { TribecaPrograms } from '../../src';
+import { TribecaSDK } from '../../src';
+import type { GovernorWrapper } from '../../src/wrappers/govern/governor';
+import { findGovernorAddress } from '../../src/wrappers/govern/pda';
 
 chai.use(chaiSolana);
 
@@ -39,7 +39,7 @@ export const DUMMY_INSTRUCTIONS = [
   Keypair.generate().publicKey,
   Keypair.generate().publicKey,
 ].map(
-  (pid) =>
+  pid =>
     new TransactionInstruction({
       programId: pid,
       keys: [],
@@ -89,7 +89,7 @@ export const setupGovernor = async ({
     threshold: ONE,
     numOwners: 3,
   });
-  await expectTX(tx1, "create smart wallet").to.be.fulfilled;
+  await expectTX(tx1, 'create smart wallet').to.be.fulfilled;
 
   const { wrapper, tx: tx2 } = await sdk.govern.createGovernor({
     baseKP,
@@ -97,7 +97,7 @@ export const setupGovernor = async ({
     smartWallet: smartWalletWrapper.key,
     ...governorParams,
   });
-  await expectTX(tx2, "create governor").to.be.fulfilled;
+  await expectTX(tx2, 'create governor').to.be.fulfilled;
 
   return {
     governorWrapper: wrapper,
@@ -135,7 +135,7 @@ export const createUser = async (
     provider,
     instruction ? [instruction, mintToIx] : [mintToIx]
   );
-  await expectTX(tx, "mint gov tokens to user").to.be.fulfilled;
+  await expectTX(tx, 'mint gov tokens to user').to.be.fulfilled;
 
   return user;
 };
@@ -153,10 +153,10 @@ export const executeTransactionBySmartWallet = async ({
     proposer: provider.wallet.publicKey,
     instructions,
   });
-  await expectTX(tx1, "create new transaction").to.be.fulfilled;
+  await expectTX(tx1, 'create new transaction').to.be.fulfilled;
 
   const tx2 = await smartWalletWrapper.executeTransaction({ transactionKey });
-  await expectTX(tx2, "execute transaction").to.be.fulfilled;
+  await expectTX(tx2, 'execute transaction').to.be.fulfilled;
 
   return transactionKey;
 };

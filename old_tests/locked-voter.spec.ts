@@ -1,8 +1,8 @@
-import type { SmartWalletWrapper } from "@gokiprotocol/client";
-import { GokiSDK } from "@gokiprotocol/client";
-import { newProgram } from "@saberhq/anchor-contrib";
-import { assertTXThrows, expectTX } from "@saberhq/chai-solana";
-import { TransactionEnvelope } from "@saberhq/solana-contrib";
+import type { SmartWalletWrapper } from '@gokiprotocol/client';
+import { GokiSDK } from '@gokiprotocol/client';
+import { newProgram } from '@saberhq/anchor-contrib';
+import { assertTXThrows, expectTX } from '@saberhq/chai-solana';
+import { TransactionEnvelope } from '@saberhq/solana-contrib';
 import {
   createMint,
   getATAAddress,
@@ -10,21 +10,21 @@ import {
   getTokenAccount,
   sleep,
   TOKEN_PROGRAM_ID,
-} from "@saberhq/token-utils";
+} from '@saberhq/token-utils';
 import type {
   SendTransactionError,
   Signer,
   TransactionInstruction,
-} from "@solana/web3.js";
+} from '@solana/web3.js';
 import {
   Keypair,
   PublicKey,
   SYSVAR_INSTRUCTIONS_PUBKEY,
-} from "@solana/web3.js";
-import BN from "bn.js";
-import { expect } from "chai";
-import { zip } from "lodash";
-import invariant from "tiny-invariant";
+} from '@solana/web3.js';
+import BN from 'bn.js';
+import { expect } from 'chai';
+import { zip } from 'lodash';
+import invariant from 'tiny-invariant';
 
 import {
   DEFAULT_LOCKER_PARAMS,
@@ -32,20 +32,20 @@ import {
   ONE_DAY,
   ONE_YEAR,
   TRIBECA_ADDRESSES,
-} from "../src";
+} from '../src';
 import {
   findProposalAddress,
   LockerWrapper,
   VoteEscrow,
-} from "../src/wrappers";
-import type { GovernorWrapper } from "../src/wrappers/govern/governor";
-import { VoteSide } from "../src/wrappers/govern/types";
+} from '../src/wrappers';
+import type { GovernorWrapper } from '../src/wrappers/govern/governor';
+import { VoteSide } from '../src/wrappers/govern/types';
 import {
   findEscrowAddress,
   findLockerAddress,
   findWhitelistAddress,
-} from "../src/wrappers/lockedVoter/pda";
-import type { WhitelistTesterProgram } from "./workspace";
+} from '../src/wrappers/lockedVoter/pda';
+import type { WhitelistTesterProgram } from './workspace';
 import {
   createUser,
   DUMMY_INSTRUCTIONS,
@@ -55,19 +55,19 @@ import {
   setupGovernor,
   WhitelistTesterJSON,
   ZERO,
-} from "./workspace";
+} from './workspace';
 
 const expectLockedSupply = async (
   locker: LockerWrapper,
   expectedSupply: BN
 ): Promise<void> => {
   const lockerData = await locker.reload();
-  expect(lockerData.lockedSupply, "locked supply").to.bignumber.eq(
+  expect(lockerData.lockedSupply, 'locked supply').to.bignumber.eq(
     expectedSupply
   );
 };
 
-describe("Locked Voter", () => {
+describe('Locked Voter', () => {
   const sdk = makeSDK();
   const gokiSDK = GokiSDK.load({ provider: sdk.provider });
 
@@ -99,7 +99,7 @@ describe("Locked Voter", () => {
       governor: governorWrapper.governorKey,
       govTokenMint,
     });
-    await expectTX(tx1, "initialize locker").to.be.fulfilled;
+    await expectTX(tx1, 'initialize locker').to.be.fulfilled;
 
     lockerW = await LockerWrapper.load(
       sdk,
@@ -114,7 +114,7 @@ describe("Locked Voter", () => {
   let proposalIndex: BN;
   let user: Signer;
 
-  beforeEach("create a proposal", async () => {
+  beforeEach('create a proposal', async () => {
     user = await createUser(sdk.provider, govTokenMint);
     const {
       proposal: proposalInner,
@@ -125,7 +125,7 @@ describe("Locked Voter", () => {
       instructions: DUMMY_INSTRUCTIONS,
     });
     createProposalTx.addSigners(user);
-    await expectTX(createProposalTx, "creating a proposal").to.be.fulfilled;
+    await expectTX(createProposalTx, 'creating a proposal').to.be.fulfilled;
     proposal = proposalInner;
     proposalIndex = index;
   });
@@ -157,7 +157,7 @@ describe("Locked Voter", () => {
     );
   });
 
-  it("Proposal was initialized", async () => {
+  it('Proposal was initialized', async () => {
     const proposer = user.publicKey;
     const electorateData = await lockerW.data();
     const [expectedProposalKey, bump] = await findProposalAddress(
@@ -192,7 +192,7 @@ describe("Locked Voter", () => {
     );
   });
 
-  it("Cannot lock duration below min stake duration", async () => {
+  it('Cannot lock duration below min stake duration', async () => {
     user = await createUser(sdk.provider, govTokenMint);
     const tx = await lockerW.lockTokens({
       amount: INITIAL_MINT_AMOUNT,
@@ -207,15 +207,15 @@ describe("Locked Voter", () => {
       const error = e as SendTransactionError;
       expect(
         error.logs
-          ?.join("/n")
+          ?.join('/n')
           .includes(
-            "LockupDurationTooShort: Lockup duration must at least be the min stake duration."
+            'LockupDurationTooShort: Lockup duration must at least be the min stake duration.'
           )
       );
     }
   });
 
-  it("lock tokens v1 as user", async () => {
+  it('lock tokens v1 as user', async () => {
     const userV1 = await createUser(sdk.provider, govTokenMint);
     const lockTx = await lockerW.lockTokensV1({
       amount: INITIAL_MINT_AMOUNT,
@@ -223,14 +223,14 @@ describe("Locked Voter", () => {
       authority: userV1.publicKey,
     });
     lockTx.addSigners(userV1);
-    await expectTX(lockTx, "lock tokens").to.be.fulfilled;
+    await expectTX(lockTx, 'lock tokens').to.be.fulfilled;
   });
 
-  describe("Escrow", () => {
+  describe('Escrow', () => {
     let user: Signer;
     let initialLockedSupply: BN;
 
-    beforeEach("Create user and deposit tokens", async () => {
+    beforeEach('Create user and deposit tokens', async () => {
       initialLockedSupply = (await lockerW.reload()).lockedSupply;
       user = await createUser(sdk.provider, govTokenMint);
       const lockTx = await lockerW.lockTokens({
@@ -239,10 +239,10 @@ describe("Locked Voter", () => {
         authority: user.publicKey,
       });
       lockTx.addSigners(user);
-      await expectTX(lockTx, "lock tokens").to.be.fulfilled;
+      await expectTX(lockTx, 'lock tokens').to.be.fulfilled;
     });
 
-    it("Escrow was initialized and locker was updated", async () => {
+    it('Escrow was initialized and locker was updated', async () => {
       const { locker } = lockerW;
       const lockerData = await lockerW.reload();
 
@@ -267,12 +267,12 @@ describe("Locked Voter", () => {
       );
 
       const tokenAccount = await getTokenAccount(sdk.provider, escrowATA);
-      expect(tokenAccount.amount, "escrow account").to.bignumber.eq(
+      expect(tokenAccount.amount, 'escrow account').to.bignumber.eq(
         INITIAL_MINT_AMOUNT
       );
     });
 
-    it("Set vote delegate", async () => {
+    it('Set vote delegate', async () => {
       const expectedDelegate = Keypair.generate().publicKey;
       const tx = await lockerW.setVoteDelegate(
         expectedDelegate,
@@ -285,7 +285,7 @@ describe("Locked Voter", () => {
       expect(escrowData.voteDelegate).to.eqAddress(expectedDelegate);
     });
 
-    it("Set vote delegate access control test", async () => {
+    it('Set vote delegate access control test', async () => {
       const expectedDelegate = Keypair.generate().publicKey;
       const incorrectAccount = Keypair.generate();
       const [escrow] = await findEscrowAddress(lockerW.locker, user.publicKey);
@@ -301,7 +301,7 @@ describe("Locked Voter", () => {
       await expectTX(tx).to.be.rejectedWith(/0x44c/);
     });
 
-    it("Exit should fail", async () => {
+    it('Exit should fail', async () => {
       const exitTx = await lockerW.exit({ authority: user.publicKey });
       exitTx.addSigners(user);
 
@@ -309,13 +309,13 @@ describe("Locked Voter", () => {
         await exitTx.confirm();
       } catch (e) {
         const error = e as SendTransactionError;
-        expect(error.logs?.join("\n")).to.include(
-          "EscrowNotEnded: Escrow has not ended."
+        expect(error.logs?.join('\n')).to.include(
+          'EscrowNotEnded: Escrow has not ended.'
         );
       }
     });
 
-    it("Cannot vote on inactive proposal", async () => {
+    it('Cannot vote on inactive proposal', async () => {
       const voteTx = await lockerW.castVotes({
         voteSide: VoteSide.Abstain,
         proposal,
@@ -326,28 +326,28 @@ describe("Locked Voter", () => {
         await voteTx.confirm();
       } catch (e) {
         const error = e as SendTransactionError;
-        expect(error.logs?.join("\n")).to.include(
-          "Invariant failed: proposal must be active"
+        expect(error.logs?.join('\n')).to.include(
+          'Invariant failed: proposal must be active'
         );
       }
     });
 
-    it("Activate proposal", async () => {
+    it('Activate proposal', async () => {
       await sleep(3000); // sleep to pass voting delay
       const activateTx = await lockerW.activateProposal({
         proposal,
         authority: user.publicKey,
       });
       activateTx.addSigners(user);
-      await expectTX(activateTx, "activate").to.be.fulfilled;
+      await expectTX(activateTx, 'activate').to.be.fulfilled;
       const proposalData = await lockerW.fetchProposalData(proposal);
       expect(proposalData.activatedAt).to.bignumber.greaterThan(ZERO);
     });
 
-    it("Escrow refresh cannot shorten the escrow time remaining", async () => {
+    it('Escrow refresh cannot shorten the escrow time remaining', async () => {
       const lockTx = await lockerW.lockTokens({
         amount: INITIAL_MINT_AMOUNT,
-        duration: ONE_YEAR.mul(new BN("4")), // 4 years < 5 years
+        duration: ONE_YEAR.mul(new BN('4')), // 4 years < 5 years
         authority: user.publicKey,
       });
       lockTx.addSigners(user);
@@ -358,14 +358,14 @@ describe("Locked Voter", () => {
         const error = e as SendTransactionError;
         expect(
           error.logs
-            ?.join("\n")
-            .includes("escrow refresh cannot shorten the escrow time remaining")
+            ?.join('\n')
+            .includes('escrow refresh cannot shorten the escrow time remaining')
         );
       }
     });
   });
 
-  it("Exit escrow", async () => {
+  it('Exit escrow', async () => {
     const { governorKey } = governorW;
     const { locker, tx } = await sdk.createLocker({
       minStakeDuration: new BN(1),
@@ -373,7 +373,7 @@ describe("Locked Voter", () => {
       governor: governorKey,
       govTokenMint,
     });
-    await expectTX(tx, "initialize locker").to.be.fulfilled;
+    await expectTX(tx, 'initialize locker').to.be.fulfilled;
 
     const shortLockerW = await LockerWrapper.load(sdk, locker, governorKey);
     const lockTx = await shortLockerW.lockTokens({
@@ -382,13 +382,13 @@ describe("Locked Voter", () => {
       authority: user.publicKey,
     });
     lockTx.addSigners(user);
-    await expectTX(lockTx, "short lock up").to.be.fulfilled;
+    await expectTX(lockTx, 'short lock up').to.be.fulfilled;
     await expectLockedSupply(shortLockerW, INITIAL_MINT_AMOUNT);
 
     await sleep(2500); // sleep to lockup
     const exitTx = await shortLockerW.exit({ authority: user.publicKey });
     exitTx.addSigners(user);
-    await expectTX(exitTx, "exit lock up").to.be.fulfilled;
+    await expectTX(exitTx, 'exit lock up').to.be.fulfilled;
 
     const [escrowKey] = await findEscrowAddress(locker, user.publicKey);
     try {
@@ -410,11 +410,11 @@ describe("Locked Voter", () => {
     await expectLockedSupply(shortLockerW, ZERO);
   });
 
-  describe("Voting", () => {
+  describe('Voting', () => {
     let user: Signer;
     let escrowW: VoteEscrow;
 
-    beforeEach("lock token and activate proposal", async () => {
+    beforeEach('lock token and activate proposal', async () => {
       user = await createUser(sdk.provider, govTokenMint);
       const lockTx = await lockerW.lockTokens({
         amount: INITIAL_MINT_AMOUNT,
@@ -422,14 +422,14 @@ describe("Locked Voter", () => {
         authority: user.publicKey,
       });
       lockTx.addSigners(user);
-      await expectTX(lockTx, "lock tokens").to.be.fulfilled;
+      await expectTX(lockTx, 'lock tokens').to.be.fulfilled;
       await sleep(3000); // sleep to pass voting delay
       const activateTx = await lockerW.activateProposal({
         proposal,
         authority: user.publicKey,
       });
       activateTx.addSigners(user);
-      await expectTX(activateTx, "activate").to.be.fulfilled;
+      await expectTX(activateTx, 'activate').to.be.fulfilled;
       const { governorKey } = governorW;
       const { locker } = lockerW;
 
@@ -443,11 +443,11 @@ describe("Locked Voter", () => {
       );
     });
 
-    it("Cast for a proposal", async () => {
+    it('Cast for a proposal', async () => {
       const voteTx = await escrowW.castVote({ proposal, side: VoteSide.For });
 
       voteTx.addSigners(user);
-      await expectTX(voteTx, "voting successful").to.be.fulfilled;
+      await expectTX(voteTx, 'voting successful').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       const calculator = await escrowW.makeCalculateVotingPower();
@@ -458,14 +458,14 @@ describe("Locked Voter", () => {
       expect(proposalData.abstainVotes).to.bignumber.eq(ZERO);
     });
 
-    it("Cast against a proposal", async () => {
+    it('Cast against a proposal', async () => {
       const voteTx = await escrowW.castVote({
         proposal,
         side: VoteSide.Against,
       });
 
       voteTx.addSigners(user);
-      await expectTX(voteTx, "voting successful").to.be.fulfilled;
+      await expectTX(voteTx, 'voting successful').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       const calculator = await escrowW.makeCalculateVotingPower();
@@ -476,14 +476,14 @@ describe("Locked Voter", () => {
       expect(proposalData.abstainVotes).to.bignumber.eq(ZERO);
     });
 
-    it("Cast abstain on a proposal", async () => {
+    it('Cast abstain on a proposal', async () => {
       const voteTx = await escrowW.castVote({
         proposal,
         side: VoteSide.Abstain,
       });
 
       voteTx.addSigners(user);
-      await expectTX(voteTx, "voting successful").to.be.fulfilled;
+      await expectTX(voteTx, 'voting successful').to.be.fulfilled;
 
       const proposalData = await governorW.fetchProposalByKey(proposal);
       const calculator = await escrowW.makeCalculateVotingPower();
@@ -495,9 +495,9 @@ describe("Locked Voter", () => {
     });
   });
 
-  describe("CPI Whitelist", () => {
+  describe('CPI Whitelist', () => {
     const TEST_PROGRAM_ID = new PublicKey(
-      "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+      'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS'
     );
     const testProgram = newProgram<WhitelistTesterProgram>(
       WhitelistTesterJSON,
@@ -505,7 +505,7 @@ describe("Locked Voter", () => {
       sdk.provider
     );
 
-    beforeEach("Enable whitelist on the locker", async () => {
+    beforeEach('Enable whitelist on the locker', async () => {
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
         smartWalletWrapper: smartWalletW,
@@ -578,7 +578,7 @@ describe("Locked Voter", () => {
       return new TransactionEnvelope(sdk.provider, instructions, [user]);
     };
 
-    it("CPI fails when program is not whitelisted", async () => {
+    it('CPI fails when program is not whitelisted', async () => {
       const tx = await buildCPITX();
       try {
         await tx.confirm();
@@ -590,7 +590,7 @@ describe("Locked Voter", () => {
       }
     });
 
-    it("CPI succeeds after program has been whitelisted", async () => {
+    it('CPI succeeds after program has been whitelisted', async () => {
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
         smartWalletWrapper: smartWalletW,
@@ -602,11 +602,11 @@ describe("Locked Voter", () => {
         ],
       });
       const tx = await buildCPITX();
-      await expectTX(tx, "successfully locked tokens via the whitelist tester")
+      await expectTX(tx, 'successfully locked tokens via the whitelist tester')
         .to.be.fulfilled;
     });
 
-    it("CPI fails when program owner is not whitelisted", async () => {
+    it('CPI fails when program owner is not whitelisted', async () => {
       const owner = Keypair.generate();
       const faker = Keypair.generate();
       await executeTransactionBySmartWallet({
@@ -624,7 +624,7 @@ describe("Locked Voter", () => {
       await assertTXThrows(tx, LockedVoterErrors.ProgramNotWhitelisted);
     });
 
-    it("CPI succeeds after program owner has been whitelisted", async () => {
+    it('CPI succeeds after program owner has been whitelisted', async () => {
       const owner = Keypair.generate();
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
@@ -637,11 +637,11 @@ describe("Locked Voter", () => {
         ],
       });
       const tx = await buildCPITX(owner);
-      await expectTX(tx, "successfully locked tokens via the whitelist tester")
+      await expectTX(tx, 'successfully locked tokens via the whitelist tester')
         .to.be.fulfilled;
     });
 
-    it("Non CPI lock invocation should succeed", async () => {
+    it('Non CPI lock invocation should succeed', async () => {
       const { provider } = sdk;
       const user = await createUser(provider, govTokenMint);
       const tx = await lockerW.lockTokens({
@@ -650,10 +650,10 @@ describe("Locked Voter", () => {
         authority: user.publicKey,
       });
       tx.addSigners(user);
-      await expectTX(tx, "lock tokens").to.be.fulfilled;
+      await expectTX(tx, 'lock tokens').to.be.fulfilled;
     });
 
-    it("Remove whitelist", async () => {
+    it('Remove whitelist', async () => {
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
         smartWalletWrapper: smartWalletW,
@@ -667,9 +667,9 @@ describe("Locked Voter", () => {
     });
   });
 
-  describe("CPI Whitelist (v2)", () => {
+  describe('CPI Whitelist (v2)', () => {
     const TEST_PROGRAM_ID = new PublicKey(
-      "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+      'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS'
     );
     const testProgram = newProgram<WhitelistTesterProgram>(
       WhitelistTesterJSON,
@@ -731,7 +731,7 @@ describe("Locked Voter", () => {
       return new TransactionEnvelope(sdk.provider, instructions, [user]);
     };
 
-    it("CPI fails when program is not whitelisted", async () => {
+    it('CPI fails when program is not whitelisted', async () => {
       const tx = await buildCPITX();
       try {
         await tx.confirm();
@@ -743,7 +743,7 @@ describe("Locked Voter", () => {
       }
     });
 
-    it("CPI succeeds after program has been whitelisted", async () => {
+    it('CPI succeeds after program has been whitelisted', async () => {
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
         smartWalletWrapper: smartWalletW,
@@ -755,11 +755,11 @@ describe("Locked Voter", () => {
         ],
       });
       const tx = await buildCPITX();
-      await expectTX(tx, "successfully locked tokens via the whitelist tester")
+      await expectTX(tx, 'successfully locked tokens via the whitelist tester')
         .to.be.fulfilled;
     });
 
-    it("CPI fails when program owner is not whitelisted", async () => {
+    it('CPI fails when program owner is not whitelisted', async () => {
       const owner = Keypair.generate();
       const faker = Keypair.generate();
       await executeTransactionBySmartWallet({
@@ -779,7 +779,7 @@ describe("Locked Voter", () => {
       );
     });
 
-    it("CPI succeeds after program owner has been whitelisted", async () => {
+    it('CPI succeeds after program owner has been whitelisted', async () => {
       const owner = Keypair.generate();
       await executeTransactionBySmartWallet({
         provider: sdk.provider,
@@ -792,11 +792,11 @@ describe("Locked Voter", () => {
         ],
       });
       const tx = await buildCPITX(owner);
-      await expectTX(tx, "successfully locked tokens via the whitelist tester")
+      await expectTX(tx, 'successfully locked tokens via the whitelist tester')
         .to.be.fulfilled;
     });
 
-    it("Non CPI lock invocation should succeed", async () => {
+    it('Non CPI lock invocation should succeed', async () => {
       const { provider } = sdk;
       const user = await createUser(provider, govTokenMint);
       const tx = await lockerW.lockTokens({
@@ -805,7 +805,7 @@ describe("Locked Voter", () => {
         authority: user.publicKey,
       });
       tx.addSigners(user);
-      await expectTX(tx, "lock tokens").to.be.fulfilled;
+      await expectTX(tx, 'lock tokens').to.be.fulfilled;
     });
   });
 });

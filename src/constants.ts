@@ -1,10 +1,10 @@
-import { buildCoderMap } from "@saberhq/anchor-contrib";
-import { PublicKey } from "@solana/web3.js";
-import { BN } from "bn.js";
+import { buildCoderMap } from '@saberhq/anchor-contrib';
+import { PublicKey } from '@solana/web3.js';
+import { BN } from 'bn.js';
 
-import { GovernJSON } from "./idls/govern";
-import { LockedVoterJSON } from "./idls/locked_voter";
-import { SimpleVoterJSON } from "./idls/simple_voter";
+import { GovernJSON } from './idls/govern';
+import { LockedVoterJSON } from './idls/locked_voter';
+import { SimpleVoterJSON } from './idls/simple_voter';
 import type {
   GovernanceParameters,
   GovernProgram,
@@ -14,7 +14,7 @@ import type {
   LockerParams,
   SimpleVoterProgram,
   SimpleVoterTypes,
-} from "./programs";
+} from './programs';
 
 /**
  * Tribeca program types.
@@ -27,9 +27,9 @@ export interface TribecaPrograms {
 
 // See `Anchor.toml` for all addresses.
 export const TRIBECA_ADDRESSES = {
-  SimpleVoter: new PublicKey("Tok6iuA69RLN1QrpXgQKnDgE1YYbLzQsZGSoz75fQdz"),
-  Govern: new PublicKey("Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw"),
-  LockedVoter: new PublicKey("LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw"),
+  SimpleVoter: new PublicKey('Tok6iuA69RLN1QrpXgQKnDgE1YYbLzQsZGSoz75fQdz'),
+  Govern: new PublicKey('Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw'),
+  LockedVoter: new PublicKey('LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw'),
 };
 
 /**

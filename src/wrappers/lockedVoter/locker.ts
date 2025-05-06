@@ -1,30 +1,30 @@
-import type { BN } from "@project-serum/anchor";
+import type { BN } from '@project-serum/anchor';
 import {
   createMemoInstruction,
   TransactionEnvelope,
-} from "@saberhq/solana-contrib";
-import { getOrCreateATA, TOKEN_PROGRAM_ID } from "@saberhq/token-utils";
-import type { TransactionInstruction } from "@solana/web3.js";
+} from '@saberhq/solana-contrib';
+import { getOrCreateATA, TOKEN_PROGRAM_ID } from '@saberhq/token-utils';
+import type { TransactionInstruction } from '@solana/web3.js';
 import {
   PublicKey,
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
-} from "@solana/web3.js";
-import invariant from "tiny-invariant";
+} from '@solana/web3.js';
+import invariant from 'tiny-invariant';
 
-import { TRIBECA_ADDRESSES } from "../../constants";
+import { TRIBECA_ADDRESSES } from '../../constants';
 import type {
   EscrowData,
   LockedVoterProgram,
   LockerData,
   LockerParams,
   ProposalData,
-} from "../../programs";
-import type { TribecaSDK } from "../../sdk";
-import type { VoteSide } from "../../wrappers/govern/types";
-import { GovernorWrapper } from "../govern/governor";
-import { findWhitelistAddress } from ".";
-import { findEscrowAddress } from "./pda";
+} from '../../programs';
+import type { TribecaSDK } from '../../sdk';
+import type { VoteSide } from '../../wrappers/govern/types';
+import { GovernorWrapper } from '../govern/governor';
+import { findWhitelistAddress } from '.';
+import { findEscrowAddress } from './pda';
 
 /**
  * Helper methods around a Locked Voter electorate.
@@ -156,11 +156,10 @@ export class LockerWrapper {
     duration: BN;
     authority?: PublicKey;
   }): Promise<TransactionEnvelope> {
-    invariant(this.locker, "locker not set");
+    invariant(this.locker, 'locker not set');
 
-    const { escrow, instruction: initEscrowIx } = await this.getOrCreateEscrow(
-      authority
-    );
+    const { escrow, instruction: initEscrowIx } =
+      await this.getOrCreateEscrow(authority);
     const { govTokenAccount, govTokenVault, instructions } =
       await this._getOrCreateGovTokenATAsInternal(authority, escrow);
     if (initEscrowIx) {
@@ -208,11 +207,10 @@ export class LockerWrapper {
     duration: BN;
     authority?: PublicKey;
   }): Promise<TransactionEnvelope> {
-    invariant(this.locker, "locker not set");
+    invariant(this.locker, 'locker not set');
 
-    const { escrow, instruction: initEscrowIx } = await this.getOrCreateEscrow(
-      authority
-    );
+    const { escrow, instruction: initEscrowIx } =
+      await this.getOrCreateEscrow(authority);
     const { govTokenAccount, govTokenVault, instructions } =
       await this._getOrCreateGovTokenATAsInternal(authority, escrow);
     if (initEscrowIx) {
@@ -255,7 +253,7 @@ export class LockerWrapper {
   }: {
     authority?: PublicKey;
   }): Promise<TransactionEnvelope> {
-    invariant(this.locker, "locker not set");
+    invariant(this.locker, 'locker not set');
 
     const [escrow] = await findEscrowAddress(this.locker, authority);
     const escrowData = await this.fetchEscrow(escrow);
@@ -291,9 +289,8 @@ export class LockerWrapper {
   }): Promise<TransactionEnvelope> {
     const ixs: TransactionInstruction[] = [];
 
-    const { escrow, instruction: escrowIx } = await this.getOrCreateEscrow(
-      authority
-    );
+    const { escrow, instruction: escrowIx } =
+      await this.getOrCreateEscrow(authority);
     if (escrowIx) {
       ixs.push(escrowIx);
     }

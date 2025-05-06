@@ -1,13 +1,13 @@
-import type { GokiSDK, SmartWalletWrapper } from "@gokiprotocol/client";
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { PublicKey } from "@solana/web3.js";
-import { Keypair } from "@solana/web3.js";
-import BN from "bn.js";
+import type { GokiSDK, SmartWalletWrapper } from '@gokiprotocol/client';
+import type { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
+import BN from 'bn.js';
 
-import type { GovernanceParameters, TribecaSDK } from "../..";
-import { DEFAULT_GOVERNANCE_PARAMETERS } from "../..";
-import type { GovernorWrapper } from "..";
-import { findGovernorAddress } from "..";
+import type { GovernanceParameters, TribecaSDK } from '../..';
+import { DEFAULT_GOVERNANCE_PARAMETERS } from '../..';
+import type { GovernorWrapper } from '..';
+import { findGovernorAddress } from '..';
 
 /**
  * Creates a Governor.
@@ -60,13 +60,12 @@ export const createGovernorWithElectorate = async ({
     base: smartWalletBaseKP,
   });
   createTXs.push({
-    title: "Create Smart Wallet",
+    title: 'Create Smart Wallet',
     tx: tx1,
   });
 
-  const { key: electorate, tx: createElectorateTX } = await createElectorate(
-    governor
-  );
+  const { key: electorate, tx: createElectorateTX } =
+    await createElectorate(governor);
 
   const { wrapper: governorWrapper, tx: tx2 } = await sdk.govern.createGovernor(
     {
@@ -77,12 +76,12 @@ export const createGovernorWithElectorate = async ({
     }
   );
   createTXs.push({
-    title: "Create Governor",
+    title: 'Create Governor',
     tx: tx2,
   });
 
   createTXs.push({
-    title: "Create Electorate",
+    title: 'Create Electorate',
     tx: createElectorateTX,
   });
 

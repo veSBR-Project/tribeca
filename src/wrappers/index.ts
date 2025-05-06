@@ -1,3 +1,3 @@
-export * from "./govern";
-export * from "./lockedVoter";
-export * from "./simpleVoter";
+export * from './govern';
+export * from './lockedVoter';
+export * from './simpleVoter';

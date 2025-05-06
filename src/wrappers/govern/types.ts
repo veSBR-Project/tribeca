@@ -1,7 +1,7 @@
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { PublicKey } from "@solana/web3.js";
+import type { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { PublicKey } from '@solana/web3.js';
 
-import type { GovernorWrapper } from "./governor";
+import type { GovernorWrapper } from './governor';
 
 export type PendingGovernor = {
   wrapper: GovernorWrapper;
@@ -56,12 +56,12 @@ export enum ProposalState {
  * Labels for proposal states.
  */
 export const PROPOSAL_STATE_LABELS: { [K in ProposalState]: string } = {
-  [ProposalState.Active]: "Active",
-  [ProposalState.Draft]: "Draft",
-  [ProposalState.Canceled]: "Canceled",
-  [ProposalState.Defeated]: "Defeated",
-  [ProposalState.Succeeded]: "Succeeded",
-  [ProposalState.Queued]: "Queued",
+  [ProposalState.Active]: 'Active',
+  [ProposalState.Draft]: 'Draft',
+  [ProposalState.Canceled]: 'Canceled',
+  [ProposalState.Defeated]: 'Defeated',
+  [ProposalState.Succeeded]: 'Succeeded',
+  [ProposalState.Queued]: 'Queued',
 } as const;
 
 /**
@@ -90,8 +90,8 @@ export enum VoteSide {
  * Labels for vote sides.
  */
 export const VOTE_SIDE_LABELS: { [K in VoteSide]: string } = {
-  [VoteSide.For]: "For",
-  [VoteSide.Against]: "Against",
-  [VoteSide.Abstain]: "Abstain",
-  [VoteSide.Pending]: "Pending",
+  [VoteSide.For]: 'For',
+  [VoteSide.Against]: 'Against',
+  [VoteSide.Abstain]: 'Abstain',
+  [VoteSide.Pending]: 'Pending',
 };

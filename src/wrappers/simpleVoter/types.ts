@@ -1,8 +1,8 @@
-import type { TransactionEnvelope } from "@saberhq/solana-contrib";
-import type { PublicKey } from "@solana/web3.js";
-import type BN from "bn.js";
+import type { TransactionEnvelope } from '@saberhq/solana-contrib';
+import type { PublicKey } from '@solana/web3.js';
+import type BN from 'bn.js';
 
-import type { VoteSide } from "../govern/types";
+import type { VoteSide } from '../govern/types';
 
 export type PendingProposal = {
   proposal: PublicKey;
