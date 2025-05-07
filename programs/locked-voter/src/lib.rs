@@ -12,12 +12,15 @@ use vipers::prelude::*;
 
 mod instructions;
 pub mod locker;
+mod redeem;
 mod state;
 
 pub use instructions::*;
+pub use redeem::*;
 pub use state::*;
 
-declare_id!("LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw");
+// declare_id!("LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw");
+declare_id!("EiLpunWsN4WPoYCbAsw9Rf7FzAewJrLbpNydfWsd2zgv");
 
 /// Locked voter program.
 #[deny(missing_docs)]
@@ -133,11 +136,25 @@ pub mod locked_voter {
         ctx.accounts.revoke_program_lock_privilege()
     }
 
+    // REDEEMER
+
     /// Instantly withdraws all tokens from an [Escrow] before the lock period ends,
     /// mints a receipt token to the user, and sends the withdrawn tokens to the treasury.
     #[access_control(ctx.accounts.validate())]
     pub fn instant_withdraw(ctx: Context<InstantWithdraw>, amount: u64) -> Result<()> {
         ctx.accounts.instant_withdraw(amount)
+    }
+
+    /// Creates a new [LockerRedeemer].
+    // #[access_control(ctx.accounts.validate())]
+    pub fn create_redeemer(ctx: Context<CreateRedeemer>, claim_rate: u8) -> Result<()> {
+        ctx.accounts.create_redeemer(claim_rate)
+    }
+
+    /// Updates the admin of a [LockerRedeemer].
+    // #[access_control(ctx.accounts.validate())]
+    pub fn update_redeemer_admin(ctx: Context<UpdateRedeemerAdmin>) -> Result<()> {
+        ctx.accounts.update_redeemer_admin()
     }
 }
 

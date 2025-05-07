@@ -11,7 +11,8 @@ import {
   TOKEN_PROGRAM_ID,
   getOrCreateAssociatedTokenAccount,
 } from '@solana/spl-token';
-import { BN } from '@coral-xyz/anchor';
+
+const { BN } = anchor.default;
 
 /**
  * Tribeca SDK
@@ -19,22 +20,22 @@ import { BN } from '@coral-xyz/anchor';
  * @description - The TribecaSDK class is used to interact with the Tribeca locked-voter program
  */
 export class TribecaSDK {
-  private readonly program: Program;
+  private readonly tribecaProgram: Program;
   private readonly gokiProgram: Program;
   private readonly governorProgram: Program;
 
   /**
    * Constructor for TribecaSDK
-   * @param program - The locked voter program
+   * @param tribecaProgram - The tribeca program
    * @param gokiProgram - The Goki smart wallet program
    * @param governorProgram - The Tribeca governor program
    */
   constructor(
-    program: Program,
+    tribecaProgram: Program,
     gokiProgram: Program,
     governorProgram: Program
   ) {
-    this.program = program;
+    this.tribecaProgram = tribecaProgram;
     this.gokiProgram = gokiProgram;
     this.governorProgram = governorProgram;
   }
@@ -50,14 +51,14 @@ export class TribecaSDK {
     payer: anchor.Wallet,
     baseKey: PublicKey,
     options: {
-      maxOwners?: number;
-      threshold?: BN;
-      minimumDelay?: BN;
+      maxOwners?: any;
+      threshold?: any;
+      minimumDelay?: any;
       electorate?: PublicKey;
-      votingDelay?: BN;
-      votingPeriod?: BN;
-      quorumVotes?: BN;
-      timelockDelaySeconds?: BN;
+      votingDelay?: any;
+      votingPeriod?: any;
+      quorumVotes?: any;
+      timelockDelaySeconds?: any;
     } = {}
   ) {
     try {
@@ -87,7 +88,7 @@ export class TribecaSDK {
         );
 
       // Define the owners array (payer and governor)
-      const owners = [payer, tribecaGovernorPDA];
+      const owners = [payer.publicKey, tribecaGovernorPDA];
 
       // Create smart wallet instruction
       const createSmartWalletInstruction = await this.gokiProgram.methods
@@ -110,10 +111,10 @@ export class TribecaSDK {
       // Create governor instruction
       const createGovernorInstruction = await this.governorProgram.methods
         .createGovernor(tribecaGovernorBump, electorate, {
-          voting_delay: votingDelay,
-          voting_period: votingPeriod,
-          quorum_votes: quorumVotes,
-          timelock_delay_seconds: timelockDelaySeconds,
+          votingDelay,
+          votingPeriod,
+          quorumVotes,
+          timelockDelaySeconds,
         })
         .accounts({
           base: baseKey,
@@ -140,64 +141,51 @@ export class TribecaSDK {
   }
 
   /**
-   * Create reward vaults for tokens
-   * @param tokenMint - The mint address of the token
-   * @returns - The reward vault PDA for the token
-   */
-  getRewardVault(tokenMint: PublicKey) {
-    try {
-      const [rewardVaultPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from('reward_vault'), tokenMint.toBuffer()],
-        this.program.programId
-      );
-
-      return rewardVaultPDA;
-    } catch (error) {
-      console.error('Error getting reward vault', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Create a locked voter instance
+   * Create a new locker instance
    * @param payer - The payer of the transaction
+   * @param baseKey - The base keypair for deriving PDAs (must be a signer)
    * @param governanceToken - The governance token mint
+   * @param governor - The governor account
    * @param options - Configuration options
-   * @returns - The instruction to create a locked voter instance
+   * @returns - The instruction to create a new locker instance
    */
-  async createLockedVoter(
+  async createNewLocker(
     payer: PublicKey,
+    baseKey: PublicKey,
     governanceToken: PublicKey,
+    governor: PublicKey,
     options: {
-      governor?: PublicKey;
-      vestingMinTimeSeconds?: BN;
-      maxStakeVoteMultiplier?: number;
-      proposalActivationMinVotes?: BN;
-    } = {}
+      whitelistEnabled: boolean;
+      maxStakeVoteMultiplier: any;
+      maxStakeDuration: any;
+      minStakeDuration: any;
+      proposalActivationMinVotes: any;
+    }
   ) {
     try {
-      // Default values
       const {
-        governor,
-        vestingMinTimeSeconds = new BN(86400), // 1 day
-        maxStakeVoteMultiplier = 10,
-        proposalActivationMinVotes = new BN(1000000),
+        whitelistEnabled,
+        maxStakeVoteMultiplier,
+        minStakeDuration,
+        maxStakeDuration,
+        proposalActivationMinVotes,
       } = options;
 
-      // Find locker PDA
-      const [lockerPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from('locker')],
-        this.program.programId
+      const [lockerPDA, lockerBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Locker'), baseKey.toBuffer()],
+        this.tribecaProgram.programId
       );
 
-      // Create the instruction
-      const createLockedVoterInstruction = await this.program.methods
-        .createLocker(
-          vestingMinTimeSeconds,
+      const createLockerInstruction = await this.tribecaProgram.methods
+        .newLocker(lockerBump, {
+          whitelistEnabled,
           maxStakeVoteMultiplier,
-          proposalActivationMinVotes
-        )
+          minStakeDuration,
+          maxStakeDuration,
+          proposalActivationMinVotes,
+        })
         .accounts({
+          base: baseKey,
           locker: lockerPDA,
           tokenMint: governanceToken,
           governor: governor,
@@ -207,11 +195,11 @@ export class TribecaSDK {
         .instruction();
 
       return {
-        createLockedVoterInstruction,
+        createLockerInstruction,
         lockerPDA,
       };
     } catch (error) {
-      console.error('Error creating locked voter', error);
+      console.error('Error creating new locker', error);
       throw error;
     }
   }
@@ -219,25 +207,25 @@ export class TribecaSDK {
   /**
    * Create escrow account for user
    * @param payer - The payer of the transaction
-   * @param owner - The owner of the escrow
    * @param locker - The locker account
+   * @param owner - The owner of the escrow
    * @returns - The instruction to create an escrow account
    */
-  async createEscrow(payer: PublicKey, owner: PublicKey, locker: PublicKey) {
+  async createNewEscrow(payer: PublicKey, locker: PublicKey, owner: PublicKey) {
     try {
       // Find escrow PDA
-      const [escrowPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from('escrow'), owner.toBuffer()],
-        this.program.programId
+      const [escrowPDA, escrowBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Escrow'), locker.toBuffer(), owner.toBuffer()],
+        this.tribecaProgram.programId
       );
 
       // Create the instruction
-      const createEscrowInstruction = await this.program.methods
-        .createEscrow()
+      const createEscrowInstruction = await this.tribecaProgram.methods
+        .newEscrow(escrowBump)
         .accounts({
-          escrow: escrowPDA,
           locker: locker,
-          owner: owner,
+          escrow: escrowPDA,
+          escrowOwner: owner,
           payer: payer,
           systemProgram: SystemProgram.programId,
         })
@@ -255,58 +243,44 @@ export class TribecaSDK {
 
   /**
    * Lock tokens in escrow
-   * @param connection - Solana connection
    * @param payer - The payer of the transaction
-   * @param owner - The owner of the escrow
    * @param locker - The locker account
    * @param escrow - The escrow account
+   * @param escrowTokens - The escrow token account
+   * @param sourceTokens - The source token account
    * @param tokenMint - The mint of the token to lock
    * @param amount - The amount to lock
-   * @param duration - The lock duration in seconds
    * @returns - The instruction to lock tokens
    */
   async lockTokens(
-    connection: Connection,
-    payer: anchor.Wallet,
-    owner: PublicKey,
+    payer: PublicKey,
     locker: PublicKey,
     escrow: PublicKey,
-    tokenMint: PublicKey,
-    amount: BN,
-    duration: BN
+    escrowTokens: PublicKey,
+    sourceTokens: PublicKey,
+    amount: any,
+    duration: any
   ) {
     try {
-      // Get the token accounts
-      const ownerTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer.payer,
-        tokenMint,
-        owner
-      );
+      const lock = {
+        locker: locker,
+        escrow: escrow,
+        escrowTokens: escrowTokens,
+        escrowOwner: payer,
+        sourceTokens: sourceTokens,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      };
 
-      // Find locker vault PDA
-      const [lockerVaultPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from('vault'), locker.toBuffer()],
-        this.program.programId
-      );
-
-      // Create the instruction
-      const lockTokensInstruction = await this.program.methods
-        .lock(amount, duration)
+      const lockTokensInstruction = await this.tribecaProgram.methods
+        .lockWithWhitelist(amount, duration)
         .accounts({
-          locker: locker,
-          escrow: escrow,
-          lockerVault: lockerVaultPDA,
-          tokenMint: tokenMint,
-          tokenFrom: ownerTokenAccount.address,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          owner: owner,
+          lock: lock,
+          instructionsSysvar: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
         })
         .instruction();
 
       return {
         lockTokensInstruction,
-        lockerVaultPDA,
       };
     } catch (error) {
       console.error('Error locking tokens', error);
@@ -326,11 +300,11 @@ export class TribecaSDK {
     owner: PublicKey,
     locker: PublicKey,
     escrow: PublicKey,
-    newDuration: BN
+    newDuration: typeof BN
   ) {
     try {
       // Create the instruction
-      const extendLockDurationInstruction = await this.program.methods
+      const extendLockDurationInstruction = await this.tribecaProgram.methods
         .extendLockDuration(newDuration)
         .accounts({
           locker: locker,
@@ -350,56 +324,94 @@ export class TribecaSDK {
 
   /**
    * Unlock tokens from escrow
-   * @param connection - Solana connection
-   * @param owner - The owner of the escrow
+   * @param payer - The payer of the transaction
    * @param locker - The locker account
    * @param escrow - The escrow account
+   * @param escrowOwner - The owner of the escrow
+   * @param escrowTokens - The escrow token account
+   * @param destinationTokens - The destination token account
    * @param tokenMint - The mint of the token to unlock
    * @returns - The instruction to unlock tokens
    */
-  async unlockTokens(
-    connection: Connection,
-    payer: anchor.Wallet,
-    owner: PublicKey,
+  async exitEscrow(
+    payer: PublicKey,
     locker: PublicKey,
     escrow: PublicKey,
+    escrowOwner: PublicKey,
+    escrowTokens: PublicKey,
+    destinationTokens: PublicKey,
     tokenMint: PublicKey
   ) {
     try {
-      // Get the token accounts
-      const ownerTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer.payer,
-        tokenMint,
-        owner
-      );
-
-      // Find locker vault PDA
-      const [lockerVaultPDA] = PublicKey.findProgramAddressSync(
-        [Buffer.from('vault'), locker.toBuffer()],
-        this.program.programId
-      );
-
       // Create the instruction
-      const unlockTokensInstruction = await this.program.methods
-        .unlock()
+      const unlockTokensInstruction = await this.tribecaProgram.methods
+        .exit()
         .accounts({
           locker: locker,
           escrow: escrow,
-          lockerVault: lockerVaultPDA,
+          escrowTokens: escrowTokens,
+          destinationTokens: destinationTokens,
           tokenMint: tokenMint,
-          tokenTo: ownerTokenAccount.address,
           tokenProgram: TOKEN_PROGRAM_ID,
-          owner: owner,
+          owner: escrowOwner,
         })
         .instruction();
 
       return {
         unlockTokensInstruction,
-        lockerVaultPDA,
       };
     } catch (error) {
       console.error('Error unlocking tokens', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param rewardMint - The mint of the reward token
+   * @param claimRate - The claim rate of the locker redeemer
+   * @returns - The instruction to create a new locker redeemer
+   */
+  async createLockerRedeemer(
+    payer: PublicKey,
+    locker: PublicKey,
+    rewardMint: PublicKey,
+    claimRate: any
+  ) {
+    try {
+      const [redeemerPDA, redeemerBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Redeemer'), locker.toBuffer(), rewardMint.toBuffer()],
+        this.tribecaProgram.programId
+      );
+
+      const programData = anchor.web3.PublicKey.findProgramAddressSync(
+        [this.tribecaProgram.programId.toBuffer()],
+        new anchor.web3.PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
+      )[0];
+
+      // Create the instruction
+      const createLockerRedeemerInstruction = await this.tribecaProgram.methods
+        .createRedeemer(claimRate)
+        .accounts({
+          locker: locker,
+          admin: payer, // must be admin of the locker
+          redeemer: redeemerPDA,
+          rewardMint: rewardMint,
+          payer: payer,
+          program: this.tribecaProgram.programId,
+          programData: programData,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction();
+
+      return {
+        createLockerRedeemerInstruction,
+        redeemerPDA,
+      };
+    } catch (error) {
+      console.error('Error creating locker redeemer', error);
       throw error;
     }
   }
@@ -422,9 +434,9 @@ export class TribecaSDK {
     admin: PublicKey,
     locker: PublicKey,
     rewardMint: PublicKey,
-    amount: BN,
-    startTs: BN,
-    endTs: BN
+    amount: any,
+    startTs: any,
+    endTs: any
   ) {
     try {
       // Get the token account
@@ -439,7 +451,7 @@ export class TribecaSDK {
       const rewardVaultPDA = this.getRewardVault(rewardMint);
 
       // Create the instruction
-      const addRewardsInstruction = await this.program.methods
+      const addRewardsInstruction = await this.tribecaProgram.methods
         .addReward(amount, startTs, endTs)
         .accounts({
           locker: locker,
@@ -491,7 +503,7 @@ export class TribecaSDK {
       const rewardVaultPDA = this.getRewardVault(rewardMint);
 
       // Create the instruction
-      const claimRewardsInstruction = await this.program.methods
+      const claimRewardsInstruction = await this.tribecaProgram.methods
         .claimRewards()
         .accounts({
           locker: locker,
@@ -515,35 +527,53 @@ export class TribecaSDK {
   }
 
   /**
-   * Vote on behalf of an escrow
-   * @param owner - The owner of the escrow
-   * @param escrow - The escrow account
-   * @param proposalAddress - The proposal address
-   * @param vote - The vote (true for yes, false for no)
-   * @returns - The instruction to vote
+   * Get the voting power of an escrow
+   * @param escrow - The escrow account public key
+   * @param locker - The locker account public key
+   * @returns - The voting power of the escrow (as a BN)
    */
-  async vote(
-    owner: PublicKey,
-    escrow: PublicKey,
-    proposalAddress: PublicKey,
-    vote: boolean
-  ) {
+  async getVotingPower(escrow: PublicKey, locker: PublicKey): Promise<any> {
     try {
-      // Create the instruction
-      const voteInstruction = await this.program.methods
-        .vote(vote)
-        .accounts({
-          escrow: escrow,
-          proposal: proposalAddress,
-          owner: owner,
-        })
-        .instruction();
+      const escrowData: any =
+        await this.tribecaProgram.account.escrow.fetch(escrow);
+      const lockerData: any =
+        await this.tribecaProgram.account.locker.fetch(locker);
 
-      return {
-        voteInstruction,
+      const calculateVotingPower = (timestampSeconds: number) => {
+        if (escrowData.escrowStartedAt.eq(new BN(0))) {
+          return new BN(0);
+        }
+
+        if (
+          timestampSeconds < escrowData.escrowStartedAt.toNumber() ||
+          timestampSeconds >= escrowData.escrowEndsAt.toNumber()
+        ) {
+          return new BN(0);
+        }
+
+        const secondsUntilLockupExpiry = escrowData.escrowEndsAt
+          .sub(new BN(timestampSeconds))
+          .toNumber();
+
+        const relevantSecondsUntilLockupExpiry = Math.min(
+          secondsUntilLockupExpiry,
+          lockerData.params.maxStakeDuration.toNumber()
+        );
+
+        const powerIfMaxLockup = escrowData.amount.mul(
+          new BN(lockerData.params.maxStakeVoteMultiplier)
+        );
+
+        const result = powerIfMaxLockup
+          .mul(new BN(relevantSecondsUntilLockupExpiry))
+          .div(lockerData.params.maxStakeDuration);
+
+        return result.toNumber() / 10 ** 6;
       };
+
+      return calculateVotingPower(Date.now() / 1000);
     } catch (error) {
-      console.error('Error voting', error);
+      console.error('Error getting voting power', error);
       throw error;
     }
   }

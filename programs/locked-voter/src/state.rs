@@ -8,6 +8,26 @@ use crate::*;
 /// A group of [Escrow]s.
 #[account]
 #[derive(Copy, Debug, Default)]
+pub struct LockerRedeemer {
+    /// The locker that is being redeemed.
+    pub locker: Pubkey,
+    /// The admin that is redeeming the locker.
+    pub admin: Pubkey,
+    /// The token mint of the locker.
+    pub reward_mint: Pubkey,
+    /// The bump seed.
+    pub bump: u8,
+    /// status of the redeemer
+    pub status: u8, // 0 = paused, 1 = active
+    /// claim rate multiplier
+    pub claim_rate: u8, // e.g 100veSBR = 1 USDC
+    /// treasury address
+    pub treasury: Pubkey,
+}
+
+/// A group of [Escrow]s.
+#[account]
+#[derive(Copy, Debug, Default)]
 pub struct Locker {
     /// Base account used to generate signer seeds.
     pub base: Pubkey,
