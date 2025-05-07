@@ -18,14 +18,22 @@ pub struct CreateRedeemer<'info> {
         seeds = [
             b"Redeemer".as_ref(),
             locker.key().as_ref(),
-            reward_mint.key().as_ref(),
+            receipt_mint.key().as_ref(),
         ],
         bump
     )]
     pub redeemer: Account<'info, LockerRedeemer>,
 
-    /// The reward mint to be used for redemption.
-    pub reward_mint: Account<'info, anchor_spl::token::Mint>,
+    /// The receipt mint to be used for redemption.
+    pub receipt_mint: Account<'info, anchor_spl::token::Mint>,
+
+    /// The treasury account where locker mint tokens are stored
+    /// e.g SBR when redeeming for USDC
+    #[account(
+        mut,
+        constraint = treasury_token_account.mint == locker.token_mint,
+    )]
+    pub treasury_token_account: Account<'info, anchor_spl::token::TokenAccount>,
 
     /// The payer for creating the redeemer account.
     #[account(mut)]
@@ -49,14 +57,18 @@ pub struct CreateRedeemer<'info> {
 
 /// Creates a new locker redeemer account.
 impl<'info> CreateRedeemer<'info> {
-    pub fn create_redeemer(&mut self, claim_rate: u8) -> Result<()> {
+    pub fn create_redeemer(&mut self, redemption_rate: u64, bump: u8) -> Result<()> {
         let redeemer = &mut self.redeemer;
 
         redeemer.locker = self.locker.key();
         redeemer.admin = self.payer.key();
-        redeemer.reward_mint = self.reward_mint.key();
+        redeemer.pending_admin = Pubkey::default();
+        redeemer.receipt_mint = self.receipt_mint.key();
         redeemer.status = 1; // active
-        redeemer.claim_rate = claim_rate;
+        redeemer.redemption_rate = redemption_rate;
+        redeemer.treasury = self.treasury_token_account.key();
+        redeemer.bump = bump;
+
         msg!("Created locker redeemer for locker {}", self.locker.key());
         Ok(())
     }

@@ -1,7 +1,21 @@
+pub mod accept_redeemer_admin;
+pub mod add_blacklist_entry;
+pub mod add_funds;
 pub mod create_redeemer;
 pub mod instant_withdraw;
+pub mod remove_blacklist_entry;
+pub mod toggle_redeemer;
 pub mod update_redeemer_admin;
+pub mod update_redemption_rate;
+pub mod update_treasury;
 
+pub use accept_redeemer_admin::*;
+pub use add_blacklist_entry::*;
+pub use add_funds::*;
 pub use create_redeemer::*;
 pub use instant_withdraw::*;
+pub use remove_blacklist_entry::*;
+pub use toggle_redeemer::*;
 pub use update_redeemer_admin::*;
+pub use update_redemption_rate::*;
+pub use update_treasury::*;

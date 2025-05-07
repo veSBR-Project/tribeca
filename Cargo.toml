@@ -1,5 +1,6 @@
 [workspace]
 members = ["programs/*"]
+rust-version = "1.78.0"
 
 [profile.release]
 lto = "fat"

@@ -3,7 +3,7 @@ use anchor_spl::token::*;
 use locked_voter::{program::LockedVoter, Escrow, Locker, LockerWhitelistEntry};
 
 // declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
-declare_id!("49VyC2GEJXYRW8Vc1Rjh1CWVqg6Xa3tYJht1F6JWrgjL");
+declare_id!("EvZHTyiptjwwnbGny88fHV9FAU79zH6NVx6Reairwkb5");
 
 #[program]
 pub mod whitelist_tester {

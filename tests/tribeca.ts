@@ -36,6 +36,7 @@ const payer = provider.wallet as anchor.Wallet;
 const connection = new Connection(RPC_URL, 'confirmed');
 
 const BASE_KEY = Keypair.generate();
+const TREASURY_KEY = Keypair.generate();
 
 let SBR_MINT: anchor.web3.PublicKey;
 let USDC_MINT: anchor.web3.PublicKey;
@@ -115,7 +116,7 @@ describe('tribeca test', () => {
         SBR_MINT,
         depositTokenAccount.address,
         payer.publicKey,
-        1000 * 10 ** 6
+        10000 * 10 ** 6
       );
 
       const mintUsdcIx = await mintTo(
@@ -124,7 +125,7 @@ describe('tribeca test', () => {
         USDC_MINT,
         usdcTokenAccount.address,
         payer.publicKey,
-        1000 * 10 ** 6
+        10000 * 10 ** 6
       );
 
       const sbrBalance = await connection.getTokenAccountBalance(
@@ -367,12 +368,21 @@ describe('tribeca test', () => {
 
   it('Creates a locker redeemer', async () => {
     try {
+      const { address: treasuryTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          TREASURY_KEY.publicKey
+        );
+
       const { createLockerRedeemerInstruction, redeemerPDA } =
         await sdk.createLockerRedeemer(
           payer.publicKey,
           LOCKER_PDA,
           USDC_MINT,
-          10
+          new BN(1000), // redemption rate multiplier -  1 USDC = 1000 veSBR
+          treasuryTokenAccount
         );
 
       const transaction = new anchor.web3.Transaction();
@@ -389,18 +399,15 @@ describe('tribeca test', () => {
       console.log('Transaction sent and confirmed', tx);
 
       REDEEMER_PDA = redeemerPDA;
+    } catch (err) {
+      console.error('Error creating locker redeemer', err);
+      throw err;
+    }
+  });
 
-      // source token account
-      const { address: sourceTokenAccount } =
-        await getOrCreateAssociatedTokenAccount(
-          connection,
-          payer.payer,
-          USDC_MINT,
-          payer.publicKey
-        );
-
-      // redeemer token account
-      const { address: redeemerTokenAccount } =
+  it('Adds funds to locker redeemer', async () => {
+    try {
+      const { address: redeemerReceiptAccount } =
         await getOrCreateAssociatedTokenAccount(
           connection,
           payer.payer,
@@ -409,17 +416,407 @@ describe('tribeca test', () => {
           true
         );
 
-      // transfer 1000 sbr to the redeemer
-      const transferSbrIx = await transfer(
+      const { address: sourceTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          USDC_MINT,
+          payer.publicKey
+        );
+
+      const { addFundsInstruction } = await sdk.addFunds(
+        payer.publicKey,
+        LOCKER_PDA,
+        REDEEMER_PDA,
+        redeemerReceiptAccount,
+        sourceTokenAccount,
+        new BN(1000 * Math.pow(10, 6))
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(addFundsInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.amount.toString());
+    } catch (err) {
+      console.error('Error adding funds to locker redeemer', err);
+      throw err;
+    }
+  });
+
+  it('Adds a blacklist entry', async () => {
+    try {
+      const { addBlacklistEntryInstruction } = await sdk.addBlacklistEntry(
+        payer.publicKey,
+        LOCKER_PDA,
+        ESCROW_PDA,
+        REDEEMER_PDA
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(addBlacklistEntryInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+    } catch (err) {
+      console.error('Error adding blacklist entry', err);
+      throw err;
+    }
+  });
+
+  it('Removes a blacklist entry', async () => {
+    try {
+      const { removeBlacklistEntryInstruction } =
+        await sdk.removeBlacklistEntry(
+          payer.publicKey,
+          LOCKER_PDA,
+          ESCROW_PDA,
+          REDEEMER_PDA
+        );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(removeBlacklistEntryInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+    } catch (err) {
+      console.error('Error removing blacklist entry', err);
+      throw err;
+    }
+  });
+
+  it('Instantly withdraws from locker', async () => {
+    try {
+      const { address: escrowTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          ESCROW_PDA,
+          true
+        );
+
+      const { address: redeemerReceiptAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          USDC_MINT,
+          REDEEMER_PDA,
+          true
+        );
+
+      const { address: treasuryTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          TREASURY_KEY.publicKey
+        );
+
+      const { address: userReceipt } = await getOrCreateAssociatedTokenAccount(
         connection,
         payer.payer,
-        sourceTokenAccount,
-        redeemerTokenAccount,
-        payer.publicKey,
-        100 * Math.pow(10, 6)
+        USDC_MINT,
+        payer.publicKey
       );
+
+      const { instantWithdrawInstruction, blacklistPDA } =
+        await sdk.instantWithdraw(
+          payer.publicKey,
+          LOCKER_PDA,
+          REDEEMER_PDA,
+          USDC_MINT,
+          redeemerReceiptAccount,
+          ESCROW_PDA,
+          escrowTokenAccount,
+          treasuryTokenAccount,
+          userReceipt
+        );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(instantWithdrawInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the escrow account
+      const escrow = await sdk.tribecaProgram.account.escrow.fetch(ESCROW_PDA);
+      console.log('Escrow', escrow);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.amount.toString());
     } catch (err) {
-      console.error('Error creating locker redeemer', err);
+      console.error('Error instant withdrawing', err);
+      throw err;
+    }
+  });
+
+  // This will fail which is expected
+  it('Attempts to instantly withdraw from locker again', async () => {
+    try {
+      const { address: escrowTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          ESCROW_PDA,
+          true
+        );
+
+      const { address: redeemerReceiptAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          USDC_MINT,
+          REDEEMER_PDA,
+          true
+        );
+
+      const { address: treasuryTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          TREASURY_KEY.publicKey
+        );
+
+      const { address: userReceipt } = await getOrCreateAssociatedTokenAccount(
+        connection,
+        payer.payer,
+        USDC_MINT,
+        payer.publicKey
+      );
+
+      const { instantWithdrawInstruction, blacklistPDA } =
+        await sdk.instantWithdraw(
+          payer.publicKey,
+          LOCKER_PDA,
+          REDEEMER_PDA,
+          USDC_MINT,
+          redeemerReceiptAccount,
+          ESCROW_PDA,
+          escrowTokenAccount,
+          treasuryTokenAccount,
+          userReceipt
+        );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(instantWithdrawInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]).catch(err => {
+        expect(err.message).to.include('already in use');
+      });
+    } catch (err) {
+      console.error('Error instant withdrawing', err);
+      throw err;
+    }
+  });
+
+  it('Updates the treasury of a locker redeemer', async () => {
+    try {
+      const randomKey = Keypair.generate();
+
+      const { address: newTreasuryTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          randomKey.publicKey
+        );
+
+      const { updateTreasuryInstruction } = await sdk.updateTreasury(
+        payer.publicKey,
+        LOCKER_PDA,
+        REDEEMER_PDA,
+        newTreasuryTokenAccount
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(updateTreasuryInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+    } catch (err) {
+      console.error('Error updating treasury', err);
+      throw err;
+    }
+  });
+
+  it('Updates the redemption rate of a locker redeemer', async () => {
+    try {
+      const { updateRedemptionRateInstruction } =
+        await sdk.updateRedemptionRate(
+          payer.publicKey,
+          LOCKER_PDA,
+          REDEEMER_PDA,
+          new BN(2000)
+        );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(updateRedemptionRateInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.redemptionRate.toString());
+    } catch (err) {
+      console.error('Error updating redemption rate', err);
+      throw err;
+    }
+  });
+
+  it('Toggles the status of a locker redeemer', async () => {
+    try {
+      const { toggleRedeemerInstruction } = await sdk.toggleRedeemer(
+        payer.publicKey,
+        LOCKER_PDA,
+        REDEEMER_PDA,
+        1 // 0 = paused, 1 = active
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(toggleRedeemerInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.status);
+    } catch (err) {
+      console.error('Error toggling redeemer', err);
+      throw err;
+    }
+  });
+
+  const newAdmin = Keypair.generate();
+
+  it('Updates the admin of a locker redeemer', async () => {
+    try {
+      const { updateRedeemerAdminInstruction } = await sdk.updateRedeemerAdmin(
+        payer.publicKey,
+        LOCKER_PDA,
+        REDEEMER_PDA,
+        newAdmin.publicKey
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(updateRedeemerAdminInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.pendingAdmin.toString());
+    } catch (err) {
+      console.error('Error updating redeemer admin', err);
+      throw err;
+    }
+  });
+
+  it('Accepts the pending admin of a locker redeemer', async () => {
+    try {
+      const { acceptRedeemerAdminInstruction } = await sdk.acceptRedeemerAdmin(
+        newAdmin.publicKey,
+        LOCKER_PDA,
+        REDEEMER_PDA
+      );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(acceptRedeemerAdminInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        newAdmin,
+        payer.payer, // to pay for the transaction
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      // get the redeemer account
+      const redeemer =
+        await sdk.tribecaProgram.account.lockerRedeemer.fetch(REDEEMER_PDA);
+      console.log('Redeemer', redeemer.admin.toString());
+    } catch (err) {
+      console.error('Error accepting redeemer admin', err);
       throw err;
     }
   });

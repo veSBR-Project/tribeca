@@ -5,120 +5,157 @@ use crate::*;
 pub struct InstantWithdraw<'info> {
     /// The [Locker].
     #[account(mut)]
-    pub locker: Account<'info, Locker>,
+    pub locker: Box<Account<'info, Locker>>,
+
+    /// The [LockerRedeemer].
+    #[account(
+        mut,
+        constraint = redeemer.locker == locker.key(),
+        constraint = redeemer.status == 1 @ErrorCode::RedeemerNotActive
+    )]
+    pub redeemer: Box<Account<'info, LockerRedeemer>>,
 
     /// The [Escrow] that tokens are being withdrawn from.
     #[account(
         mut,
         has_one = locker,
-        has_one = owner,
+        constraint = escrow.owner == payer.key(),
     )]
-    pub escrow: Account<'info, Escrow>,
+    pub escrow: Box<Account<'info, Escrow>>,
 
-    /// The escrow owner.
-    pub owner: Signer<'info>,
+    /// The [Blacklist].
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + std::mem::size_of::<Blacklist>(),
+        seeds = [
+            b"Blacklist".as_ref(),
+            locker.key().as_ref(),
+            escrow.key().as_ref(),
+        ],
+        bump,
+    )]
+    pub blacklist: Box<Account<'info, Blacklist>>,
+
+    /// The receipt token [Mint].
+    #[account(mut)]
+    pub receipt_mint: Box<Account<'info, Mint>>,
+
+    /// The [TokenAccount] holding the redeemer's receipt tokens.
+    #[account(
+        mut,
+        constraint = redeemer_receipt_account.mint == receipt_mint.key(),
+    )]
+    pub redeemer_receipt_account: Box<Account<'info, TokenAccount>>,
 
     /// The [TokenAccount] holding the escrow's tokens, i.e., the source of the withdrawal.
     #[account(
         mut,
         constraint = escrow_tokens.mint == locker.token_mint,
-        constraint = escrow_tokens.owner == escrow.key(),
     )]
-    pub escrow_tokens: Account<'info, TokenAccount>,
+    pub escrow_tokens: Box<Account<'info, TokenAccount>>,
 
     /// The DAO treasury [TokenAccount] that will receive the withdrawn tokens.
     #[account(
         mut,
-        constraint = treasury.mint == locker.token_mint,
+        constraint = treasury_token_account.mint == locker.token_mint,
+        constraint = treasury_token_account.key() == redeemer.treasury,
     )]
-    pub treasury: Account<'info, TokenAccount>,
-
-    /// The receipt token [Mint].
-    #[account(mut)]
-    pub receipt_mint: Account<'info, Mint>,
+    pub treasury_token_account: Box<Account<'info, TokenAccount>>,
 
     /// The receipt [TokenAccount] owned by the user.
     #[account(
         mut,
         constraint = user_receipt.mint == receipt_mint.key(),
-        constraint = user_receipt.owner == owner.key(),
+        constraint = user_receipt.owner == payer.key(),
     )]
-    pub user_receipt: Account<'info, TokenAccount>,
+    pub user_receipt: Box<Account<'info, TokenAccount>>,
+
+    /// The payer for creating the blacklist account.
+    #[account(mut)]
+    pub payer: Signer<'info>,
 
     /// Program to create the receipt token mint.
     pub token_program: Program<'info, Token>,
 
     /// Clock to get the current time.
     pub clock: Sysvar<'info, Clock>,
+
+    /// System program.
+    pub system_program: Program<'info, System>,
 }
 
 impl<'info> InstantWithdraw<'info> {
     pub fn validate(&self) -> Result<()> {
         // Ensure the escrow has tokens
         invariant!(self.escrow.amount > 0, "Escrow is empty");
+        invariant!(self.blacklist.timestamp == 0, "Escrow account blacklisted");
         Ok(())
     }
 
-    pub fn instant_withdraw(&mut self, amount: u64) -> Result<()> {
-        // Verify the amount to withdraw
-        invariant!(
-            amount > 0 && amount <= self.escrow.amount,
-            "Invalid withdrawal amount"
-        );
+    pub fn instant_withdraw(&mut self) -> Result<()> {
+        invariant!(self.escrow.amount > 0, "Escrow is empty");
 
-        // Calculate any fees or penalties for early withdrawal
-        // This could be a percentage of the locked tokens
-        let penalty_rate = 5; // Example: 5% penalty
-        let penalty_amount = amount.checked_mul(penalty_rate).unwrap() / 100;
-        let transfer_amount = amount;
+        let base_amount = self.escrow.amount;
+        let ve_sbr_amount = self.escrow.voting_power(&self.locker.params)?;
+        let redemption_rate = self
+            .redeemer
+            .redemption_rate
+            .checked_mul(10u64.pow(self.receipt_mint.decimals as u32))
+            .unwrap();
+        let receipt_amount = ve_sbr_amount.checked_div(redemption_rate).unwrap();
 
-        // Transfer tokens from escrow to treasury
+        let escrow_seeds: &[&[&[u8]]] = escrow_seeds!(self.escrow);
+        let redeemer_seeds: &[&[&[u8]]] = redeemer_seeds!(self.redeemer);
+
+        // Transfer escrow tokens to treasury
         anchor_spl::token::transfer(
             CpiContext::new(
                 self.token_program.to_account_info(),
                 anchor_spl::token::Transfer {
                     from: self.escrow_tokens.to_account_info(),
-                    to: self.treasury.to_account_info(),
+                    to: self.treasury_token_account.to_account_info(),
                     authority: self.escrow.to_account_info(),
                 },
-            ),
-            transfer_amount,
+            )
+            .with_signer(escrow_seeds),
+            base_amount,
         )?;
 
-        // Mint receipt tokens to the user
-        // The amount could be the same as withdrawn or adjusted based on some formula
-        let receipt_amount = amount;
-
-        anchor_spl::token::mint_to(
-            CpiContext::new_with_signer(
+        // transfer receipt tokens to the user
+        anchor_spl::token::transfer(
+            CpiContext::new(
                 self.token_program.to_account_info(),
-                anchor_spl::token::MintTo {
-                    mint: self.receipt_mint.to_account_info(),
+                anchor_spl::token::Transfer {
+                    from: self.redeemer_receipt_account.to_account_info(),
                     to: self.user_receipt.to_account_info(),
-                    authority: self.receipt_mint.to_account_info(),
+                    authority: self.redeemer.to_account_info(),
                 },
-                &[&[b"receipt_mint".as_ref(), &[/* Bump goes here */]]],
-            ),
+            )
+            .with_signer(redeemer_seeds),
             receipt_amount,
         )?;
 
-        // Update the escrow state
-        self.escrow.amount = self.escrow.amount.checked_sub(amount).unwrap();
+        // Update the redeemer balance
+        self.redeemer.amount = self.redeemer.amount.checked_sub(receipt_amount).unwrap();
 
-        // If completely withdrawn, you might want to reset other escrow properties
-        if self.escrow.amount == 0 {
-            self.escrow.escrow_started_at = 0;
-            self.escrow.escrow_ends_at = 0;
-        }
+        // Update the escrow state
+        self.escrow.amount = self.escrow.amount.checked_sub(base_amount).unwrap();
+        self.escrow.escrow_ends_at = 0;
+        self.escrow.escrow_started_at = 0;
+
+        // update blacklist
+        self.blacklist.locker = self.locker.key();
+        self.blacklist.escrow = self.escrow.key();
+        self.blacklist.owner = self.payer.key();
+        self.blacklist.timestamp = self.clock.unix_timestamp;
 
         // Emit an event for the withdrawal
         emit!(InstantWithdrawEvent {
             locker: self.locker.key(),
             escrow: self.escrow.key(),
-            owner: self.owner.key(),
-            amount,
-            penalty: penalty_amount,
-            receipt_amount,
+            owner: self.payer.key(),
+            amount: receipt_amount,
             timestamp: self.clock.unix_timestamp,
         });
 
@@ -140,10 +177,12 @@ pub struct InstantWithdrawEvent {
     pub owner: Pubkey,
     /// The amount withdrawn.
     pub amount: u64,
-    /// The penalty applied.
-    pub penalty: u64,
-    /// The receipt tokens minted.
-    pub receipt_amount: u64,
     /// The time of withdrawal.
     pub timestamp: i64,
+}
+
+#[error_code]
+enum ErrorCode {
+    #[msg("Redeemer is currently paused")]
+    RedeemerNotActive,
 }

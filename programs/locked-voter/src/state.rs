@@ -5,7 +5,21 @@ use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 use crate::*;
 
-/// A group of [Escrow]s.
+/// blacklist account for redeemer once redeemed
+#[account]
+#[derive(Copy, Debug, Default)]
+pub struct Blacklist {
+    /// The locker that is being redeemed.
+    pub locker: Pubkey,
+    /// escrow that is being redeemed
+    pub escrow: Pubkey,
+    /// user that is being redeemed
+    pub owner: Pubkey,
+    /// timestamp of the blacklist creation
+    pub timestamp: i64,
+}
+
+/// A redeemer for a locker.
 #[account]
 #[derive(Copy, Debug, Default)]
 pub struct LockerRedeemer {
@@ -13,16 +27,20 @@ pub struct LockerRedeemer {
     pub locker: Pubkey,
     /// The admin that is redeeming the locker.
     pub admin: Pubkey,
-    /// The token mint of the locker.
-    pub reward_mint: Pubkey,
+    /// pending admin
+    pub pending_admin: Pubkey,
+    /// The receipt mint of the locker.
+    pub receipt_mint: Pubkey,
     /// The bump seed.
     pub bump: u8,
     /// status of the redeemer
     pub status: u8, // 0 = paused, 1 = active
-    /// claim rate multiplier
-    pub claim_rate: u8, // e.g 100veSBR = 1 USDC
+    /// redemption rate multiplier
+    pub redemption_rate: u64, // e.g 1000veSBR = 1 USDC
     /// treasury address
     pub treasury: Pubkey,
+    /// amount of funds in the redeemer
+    pub amount: u64,
 }
 
 /// A group of [Escrow]s.

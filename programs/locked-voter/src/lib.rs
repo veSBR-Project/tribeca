@@ -20,7 +20,7 @@ pub use redeem::*;
 pub use state::*;
 
 // declare_id!("LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw");
-declare_id!("EiLpunWsN4WPoYCbAsw9Rf7FzAewJrLbpNydfWsd2zgv");
+declare_id!("8tAhS8CX7if6tQWAqUSK1kebGbU1WCH3jBwafq2bifMw");
 
 /// Locked voter program.
 #[deny(missing_docs)]
@@ -138,23 +138,56 @@ pub mod locked_voter {
 
     // REDEEMER
 
-    /// Instantly withdraws all tokens from an [Escrow] before the lock period ends,
-    /// mints a receipt token to the user, and sends the withdrawn tokens to the treasury.
+    /// Instantly withdraws all tokens from an [Escrow] before the lock period ends.
     #[access_control(ctx.accounts.validate())]
-    pub fn instant_withdraw(ctx: Context<InstantWithdraw>, amount: u64) -> Result<()> {
-        ctx.accounts.instant_withdraw(amount)
+    pub fn instant_withdraw(ctx: Context<InstantWithdraw>) -> Result<()> {
+        ctx.accounts.instant_withdraw()
     }
 
     /// Creates a new [LockerRedeemer].
-    // #[access_control(ctx.accounts.validate())]
-    pub fn create_redeemer(ctx: Context<CreateRedeemer>, claim_rate: u8) -> Result<()> {
-        ctx.accounts.create_redeemer(claim_rate)
+    pub fn create_redeemer(ctx: Context<CreateRedeemer>, claim_rate: u64, _bump: u8) -> Result<()> {
+        ctx.accounts
+            .create_redeemer(claim_rate, unwrap_bump!(ctx, "redeemer"))
     }
 
     /// Updates the admin of a [LockerRedeemer].
-    // #[access_control(ctx.accounts.validate())]
     pub fn update_redeemer_admin(ctx: Context<UpdateRedeemerAdmin>) -> Result<()> {
         ctx.accounts.update_redeemer_admin()
+    }
+
+    /// Accepts the pending admin of a [LockerRedeemer].
+    pub fn accept_redeemer_admin(ctx: Context<AcceptRedeemerAdmin>) -> Result<()> {
+        ctx.accounts.accept_redeemer_admin()
+    }
+
+    /// Updates the treasury address of a [LockerRedeemer].
+    pub fn update_treasury(ctx: Context<UpdateTreasury>) -> Result<()> {
+        ctx.accounts.update_treasury()
+    }
+
+    /// Manually adds a user to the blacklist.
+    pub fn add_blacklist_entry(ctx: Context<AddBlacklistEntry>) -> Result<()> {
+        ctx.accounts.add_blacklist_entry()
+    }
+
+    /// Manually removes a user from the blacklist.
+    pub fn remove_blacklist_entry(ctx: Context<RemoveBlacklistEntry>) -> Result<()> {
+        ctx.accounts.remove_blacklist_entry()
+    }
+
+    /// Adds receipt mint tokens to the redeemer PDA token account.
+    pub fn add_funds(ctx: Context<AddFunds>, amount: u64) -> Result<()> {
+        ctx.accounts.add_funds(amount)
+    }
+
+    /// Toggles the status of a [LockerRedeemer] between active and paused.
+    pub fn toggle_redeemer(ctx: Context<ToggleRedeemer>, toggle_to: u8) -> Result<()> {
+        ctx.accounts.toggle_redeemer(toggle_to)
+    }
+
+    /// Updates the redemption rate of a [LockerRedeemer].
+    pub fn update_redemption_rate(ctx: Context<UpdateRedemptionRate>, new_rate: u64) -> Result<()> {
+        ctx.accounts.update_redemption_rate(new_rate)
     }
 }
 

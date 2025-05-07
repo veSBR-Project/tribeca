@@ -17,7 +17,7 @@ mod token_cpi;
 pub use state::*;
 
 // declare_id!("Tok6iuA69RLN1QrpXgQKnDgE1YYbLzQsZGSoz75fQdz");
-declare_id!("Ffu3uA7rc1mECdfovo6HZm957N1ZRMWhEGsQrk8F7MCG");
+declare_id!("2sXUhoaTErmpTsPTEYFwTHguAvViJM6yyX8ZyMJoTF38");
 
 #[program]
 pub mod simple_voter {

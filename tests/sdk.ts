@@ -1,16 +1,7 @@
 import { Program } from '@coral-xyz/anchor-0-29.0.0';
 import * as anchor from '@coral-xyz/anchor';
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
-import {
-  TOKEN_PROGRAM_ID,
-  getOrCreateAssociatedTokenAccount,
-} from '@solana/spl-token';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const { BN } = anchor.default;
 
@@ -20,9 +11,9 @@ const { BN } = anchor.default;
  * @description - The TribecaSDK class is used to interact with the Tribeca locked-voter program
  */
 export class TribecaSDK {
-  private readonly tribecaProgram: Program;
-  private readonly gokiProgram: Program;
-  private readonly governorProgram: Program;
+  public tribecaProgram: Program;
+  public gokiProgram: Program;
+  public governorProgram: Program;
 
   /**
    * Constructor for TribecaSDK
@@ -289,40 +280,6 @@ export class TribecaSDK {
   }
 
   /**
-   * Extend lock duration
-   * @param owner - The owner of the escrow
-   * @param locker - The locker account
-   * @param escrow - The escrow account
-   * @param newDuration - The new lock duration in seconds
-   * @returns - The instruction to extend lock duration
-   */
-  async extendLockDuration(
-    owner: PublicKey,
-    locker: PublicKey,
-    escrow: PublicKey,
-    newDuration: typeof BN
-  ) {
-    try {
-      // Create the instruction
-      const extendLockDurationInstruction = await this.tribecaProgram.methods
-        .extendLockDuration(newDuration)
-        .accounts({
-          locker: locker,
-          escrow: escrow,
-          owner: owner,
-        })
-        .instruction();
-
-      return {
-        extendLockDurationInstruction,
-      };
-    } catch (error) {
-      console.error('Error extending lock duration', error);
-      throw error;
-    }
-  }
-
-  /**
    * Unlock tokens from escrow
    * @param payer - The payer of the transaction
    * @param locker - The locker account
@@ -370,19 +327,21 @@ export class TribecaSDK {
    * Create a new locker redeemer
    * @param payer - The payer of the transaction
    * @param locker - The locker account
-   * @param rewardMint - The mint of the reward token
-   * @param claimRate - The claim rate of the locker redeemer
+   * @param receiptMint - The mint of the receipt token
+   * @param redemptionRate - The redemption rate of the locker redeemer
+   * @param treasuryTokenAccount - The treasury token account
    * @returns - The instruction to create a new locker redeemer
    */
   async createLockerRedeemer(
     payer: PublicKey,
     locker: PublicKey,
-    rewardMint: PublicKey,
-    claimRate: any
+    receiptMint: PublicKey,
+    redemptionRate: any,
+    treasuryTokenAccount: PublicKey
   ) {
     try {
       const [redeemerPDA, redeemerBump] = PublicKey.findProgramAddressSync(
-        [Buffer.from('Redeemer'), locker.toBuffer(), rewardMint.toBuffer()],
+        [Buffer.from('Redeemer'), locker.toBuffer(), receiptMint.toBuffer()],
         this.tribecaProgram.programId
       );
 
@@ -393,12 +352,13 @@ export class TribecaSDK {
 
       // Create the instruction
       const createLockerRedeemerInstruction = await this.tribecaProgram.methods
-        .createRedeemer(claimRate)
+        .createRedeemer(redemptionRate, redeemerBump)
         .accounts({
           locker: locker,
           admin: payer, // must be admin of the locker
           redeemer: redeemerPDA,
-          rewardMint: rewardMint,
+          receiptMint: receiptMint,
+          treasuryTokenAccount: treasuryTokenAccount,
           payer: payer,
           program: this.tribecaProgram.programId,
           programData: programData,
@@ -417,111 +377,351 @@ export class TribecaSDK {
   }
 
   /**
-   * Add rewards to locker
-   * @param connection - Solana connection
+   *
+   * Add funds to locker redeemer
    * @param payer - The payer of the transaction
-   * @param admin - The admin of the locker
    * @param locker - The locker account
-   * @param rewardMint - The mint of the reward token
-   * @param amount - The amount of rewards to add
-   * @param startTs - The start timestamp for rewards
-   * @param endTs - The end timestamp for rewards
-   * @returns - The instruction to add rewards
+   * @param redeemer - The redeemer account
+   * @param redeemerReceiptAccount - The redeemer receipt token account
+   * @param sourceTokenAccount - The source token account
+   * @param amount - The amount to add
+   * @returns - The instruction to add funds
    */
-  async addRewards(
-    connection: Connection,
-    payer: anchor.Wallet,
-    admin: PublicKey,
+  async addFunds(
+    payer: PublicKey,
     locker: PublicKey,
-    rewardMint: PublicKey,
-    amount: any,
-    startTs: any,
-    endTs: any
+    redeemer: PublicKey,
+    redeemerReceiptAccount: PublicKey,
+    sourceTokenAccount: PublicKey,
+    amount: any
   ) {
     try {
-      // Get the token account
-      const adminTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer.payer,
-        rewardMint,
-        admin
-      );
-
-      // Find reward vault PDA
-      const rewardVaultPDA = this.getRewardVault(rewardMint);
-
-      // Create the instruction
-      const addRewardsInstruction = await this.tribecaProgram.methods
-        .addReward(amount, startTs, endTs)
+      const addFundsInstruction = await this.tribecaProgram.methods
+        .addFunds(amount)
         .accounts({
           locker: locker,
-          rewardVault: rewardVaultPDA,
-          rewardMint: rewardMint,
-          from: adminTokenAccount.address,
-          admin: admin,
+          redeemer: redeemer,
+          redeemerReceiptAccount: redeemerReceiptAccount,
+          sourceTokenAccount: sourceTokenAccount,
+          payer: payer,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .instruction();
 
       return {
-        addRewardsInstruction,
-        rewardVaultPDA,
+        addFundsInstruction,
       };
     } catch (error) {
-      console.error('Error adding rewards', error);
+      console.error('Error adding funds', error);
       throw error;
     }
   }
 
   /**
-   * Claim rewards from locker
-   * @param connection - Solana connection
-   * @param owner - The owner of the escrow
+   * Instant withdraw from locker
+   * @param payer - The payer of the transaction
    * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param receiptMint - The mint of the receipt token
    * @param escrow - The escrow account
-   * @param rewardMint - The mint of the reward token
-   * @returns - The instruction to claim rewards
+   * @param escrowTokens - The escrow token account
+   * @param treasuryTokenAccount - The treasury token account
+   * @param userReceipt - The user receipt token account
+   * @returns - The instruction to instant withdraw
    */
-  async claimRewards(
-    connection: Connection,
-    payer: anchor.Wallet,
-    owner: PublicKey,
+  async instantWithdraw(
+    payer: PublicKey,
     locker: PublicKey,
+    redeemer: PublicKey,
+    receiptMint: PublicKey,
+    redeemerReceiptAccount: PublicKey,
     escrow: PublicKey,
-    rewardMint: PublicKey
+    escrowTokens: PublicKey,
+    treasuryTokenAccount: PublicKey,
+    userReceipt: PublicKey
   ) {
     try {
-      // Get the token account
-      const ownerTokenAccount = await getOrCreateAssociatedTokenAccount(
-        connection,
-        payer.payer,
-        rewardMint,
-        owner
+      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Blacklist'), locker.toBuffer(), escrow.toBuffer()],
+        this.tribecaProgram.programId
       );
 
-      // Find reward vault PDA
-      const rewardVaultPDA = this.getRewardVault(rewardMint);
-
       // Create the instruction
-      const claimRewardsInstruction = await this.tribecaProgram.methods
-        .claimRewards()
+      const instantWithdrawInstruction = await this.tribecaProgram.methods
+        .instantWithdraw()
         .accounts({
           locker: locker,
+          redeemer: redeemer,
           escrow: escrow,
-          rewardVault: rewardVaultPDA,
-          rewardMint: rewardMint,
-          to: ownerTokenAccount.address,
-          owner: owner,
+          blacklist: blacklistPDA,
+          receiptMint: receiptMint,
+          redeemerReceiptAccount: redeemerReceiptAccount,
+          escrowTokens: escrowTokens,
+          treasuryTokenAccount: treasuryTokenAccount,
+          userReceipt: userReceipt,
+          payer: payer,
           tokenProgram: TOKEN_PROGRAM_ID,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+          systemProgram: SystemProgram.programId,
         })
         .instruction();
 
       return {
-        claimRewardsInstruction,
-        rewardVaultPDA,
+        instantWithdrawInstruction,
+        blacklistPDA,
       };
     } catch (error) {
-      console.error('Error claiming rewards', error);
+      console.error('Error instant withdrawing', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Add a blacklist entry
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param escrow - The escrow account
+   * @param redeemer - The redeemer account
+   * @param receiptMint - The mint of the receipt token
+   * @returns - The instruction to add a blacklist entry
+   */
+  async addBlacklistEntry(
+    payer: PublicKey,
+    locker: PublicKey,
+    escrow: PublicKey,
+    redeemer: PublicKey
+  ) {
+    try {
+      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Blacklist'), locker.toBuffer(), escrow.toBuffer()],
+        this.tribecaProgram.programId
+      );
+
+      const addBlacklistEntryInstruction = await this.tribecaProgram.methods
+        .addBlacklistEntry()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          escrow: escrow,
+          blacklist: blacklistPDA,
+          payer: payer,
+          systemProgram: SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .instruction();
+
+      return {
+        addBlacklistEntryInstruction,
+      };
+    } catch (error) {
+      console.error('Error adding blacklist entry', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a blacklist entry
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param escrow - The escrow account
+   * @param redeemer - The redeemer account
+   * @returns - The instruction to remove a blacklist entry
+   */
+  async removeBlacklistEntry(
+    payer: PublicKey,
+    locker: PublicKey,
+    escrow: PublicKey,
+    redeemer: PublicKey
+  ) {
+    try {
+      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+        [Buffer.from('Blacklist'), locker.toBuffer(), escrow.toBuffer()],
+        this.tribecaProgram.programId
+      );
+
+      const removeBlacklistEntryInstruction = await this.tribecaProgram.methods
+        .removeBlacklistEntry()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          escrow: escrow,
+          blacklist: blacklistPDA,
+          payer: payer,
+          systemProgram: SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .instruction();
+
+      return {
+        removeBlacklistEntryInstruction,
+      };
+    } catch (error) {
+      console.error('Error removing blacklist entry', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update the treasury of a locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param newTreasury - The new treasury account
+   * @returns - The instruction to update the treasury
+   */
+  async updateTreasury(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey,
+    newTreasury: PublicKey
+  ) {
+    try {
+      const updateTreasuryInstruction = await this.tribecaProgram.methods
+        .updateTreasury()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          payer: payer,
+          newTreasury: newTreasury,
+        })
+        .instruction();
+
+      return {
+        updateTreasuryInstruction,
+      };
+    } catch (error) {
+      console.error('Error updating treasury', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Toggle the status of a locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param toggleTo - The new status of the redeemer (0 = paused, 1 = active)
+   * @returns - The instruction to toggle the status
+   */
+  async toggleRedeemer(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey,
+    toggleTo: number // 0 or 1 (0 = paused, 1 = active)
+  ) {
+    try {
+      const toggleRedeemerInstruction = await this.tribecaProgram.methods
+        .toggleRedeemer(toggleTo)
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          payer: payer,
+        })
+        .instruction();
+
+      return {
+        toggleRedeemerInstruction,
+      };
+    } catch (error) {
+      console.error('Error toggling redeemer', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update the redemption rate of a locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param newRedemptionRate - The new redemption rate
+   * @returns - The instruction to update the redemption rate
+   */
+  async updateRedemptionRate(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey,
+    newRedemptionRate: any
+  ) {
+    try {
+      const updateRedemptionRateInstruction = await this.tribecaProgram.methods
+        .updateRedemptionRate(newRedemptionRate)
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          payer: payer,
+        })
+        .instruction();
+
+      return {
+        updateRedemptionRateInstruction,
+      };
+    } catch (error) {
+      console.error('Error updating redemption rate', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update the admin of a locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param newAdmin - The new admin account
+   * @returns - The instruction to update the admin
+   */
+  async updateRedeemerAdmin(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey,
+    newAdmin: PublicKey
+  ) {
+    try {
+      const updateRedeemerAdminInstruction = await this.tribecaProgram.methods
+        .updateRedeemerAdmin()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          currentAdmin: payer,
+          newAdmin: newAdmin,
+        })
+        .instruction();
+
+      return {
+        updateRedeemerAdminInstruction,
+      };
+    } catch (error) {
+      console.error('Error updating redeemer admin', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Accept the pending admin of a locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @returns - The instruction to accept the pending admin
+   */
+  async acceptRedeemerAdmin(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey
+  ) {
+    try {
+      const acceptRedeemerAdminInstruction = await this.tribecaProgram.methods
+        .acceptRedeemerAdmin()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          pendingAdmin: payer,
+        })
+        .instruction();
+
+      return {
+        acceptRedeemerAdminInstruction,
+      };
+    } catch (error) {
+      console.error('Error accepting redeemer admin', error);
       throw error;
     }
   }

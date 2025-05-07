@@ -24,3 +24,16 @@ macro_rules! escrow_seeds {
         ]]
     };
 }
+
+/// Generates the signer seeds for a [crate::LockerRedeemer].
+#[macro_export]
+macro_rules! redeemer_seeds {
+    ($redeemer: expr) => {
+        &[&[
+            b"Redeemer" as &[u8],
+            &$redeemer.locker.to_bytes(),
+            &$redeemer.receipt_mint.to_bytes(),
+            &[$redeemer.bump],
+        ]]
+    };
+}
