@@ -329,6 +329,7 @@ export class TribecaSDK {
    * @param locker - The locker account
    * @param receiptMint - The mint of the receipt token
    * @param redemptionRate - The redemption rate of the locker redeemer
+   * @param cutoffDate - The cutoff date of the locker redeemer
    * @param treasuryTokenAccount - The treasury token account
    * @returns - The instruction to create a new locker redeemer
    */
@@ -337,6 +338,7 @@ export class TribecaSDK {
     locker: PublicKey,
     receiptMint: PublicKey,
     redemptionRate: any,
+    cutoffDate: any,
     treasuryTokenAccount: PublicKey
   ) {
     try {
@@ -352,7 +354,7 @@ export class TribecaSDK {
 
       // Create the instruction
       const createLockerRedeemerInstruction = await this.tribecaProgram.methods
-        .createRedeemer(redemptionRate, redeemerBump)
+        .createRedeemer(redemptionRate, cutoffDate, redeemerBump)
         .accounts({
           locker: locker,
           admin: payer, // must be admin of the locker

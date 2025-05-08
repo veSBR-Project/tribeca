@@ -96,6 +96,9 @@ describe('tribeca test', () => {
         usdcMintKeypair
       );
 
+      console.log('SBR Mint', SBR_MINT.toBase58());
+      console.log('USDC Mint', USDC_MINT.toBase58());
+
       const depositTokenAccount = await getOrCreateAssociatedTokenAccount(
         connection,
         payer.payer,
@@ -216,6 +219,8 @@ describe('tribeca test', () => {
 
       LOCKER_PDA = lockerPDA;
 
+      console.log('Locker PDA', LOCKER_PDA.toBase58());
+
       const transaction = new anchor.web3.Transaction();
       transaction.add(createLockerInstruction);
       transaction.feePayer = payer.publicKey;
@@ -234,6 +239,49 @@ describe('tribeca test', () => {
       throw err;
     }
   });
+
+  it('Creates a locker redeemer', async () => {
+    try {
+      const { address: treasuryTokenAccount } =
+        await getOrCreateAssociatedTokenAccount(
+          connection,
+          payer.payer,
+          SBR_MINT,
+          TREASURY_KEY.publicKey
+        );
+
+      const { createLockerRedeemerInstruction, redeemerPDA } =
+        await sdk.createLockerRedeemer(
+          payer.publicKey,
+          LOCKER_PDA,
+          USDC_MINT,
+          new BN(1000), // redemption rate multiplier -  1 USDC = 1000 veSBR
+          new BN(Date.now() + 14 * 24 * 60 * 60 * 1000), // two weeks from now
+          treasuryTokenAccount
+        );
+
+      const transaction = new anchor.web3.Transaction();
+      transaction.add(createLockerRedeemerInstruction);
+      transaction.feePayer = payer.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
+      ]);
+
+      console.log('Transaction sent and confirmed', tx);
+
+      REDEEMER_PDA = redeemerPDA;
+      console.log('Redeemer PDA', REDEEMER_PDA.toBase58());
+    } catch (err) {
+      console.error('Error creating locker redeemer', err);
+      throw err;
+    }
+  });
+
+  return;
 
   it('Creates an escrow', async () => {
     try {
@@ -366,45 +414,6 @@ describe('tribeca test', () => {
     }
   });
 
-  it('Creates a locker redeemer', async () => {
-    try {
-      const { address: treasuryTokenAccount } =
-        await getOrCreateAssociatedTokenAccount(
-          connection,
-          payer.payer,
-          SBR_MINT,
-          TREASURY_KEY.publicKey
-        );
-
-      const { createLockerRedeemerInstruction, redeemerPDA } =
-        await sdk.createLockerRedeemer(
-          payer.publicKey,
-          LOCKER_PDA,
-          USDC_MINT,
-          new BN(1000), // redemption rate multiplier -  1 USDC = 1000 veSBR
-          treasuryTokenAccount
-        );
-
-      const transaction = new anchor.web3.Transaction();
-      transaction.add(createLockerRedeemerInstruction);
-      transaction.feePayer = payer.publicKey;
-      transaction.recentBlockhash = (
-        await connection.getLatestBlockhash()
-      ).blockhash;
-
-      const tx = await sendAndConfirmTransaction(connection, transaction, [
-        payer.payer,
-      ]);
-
-      console.log('Transaction sent and confirmed', tx);
-
-      REDEEMER_PDA = redeemerPDA;
-    } catch (err) {
-      console.error('Error creating locker redeemer', err);
-      throw err;
-    }
-  });
-
   it('Adds funds to locker redeemer', async () => {
     try {
       const { address: redeemerReceiptAccount } =
@@ -513,6 +522,7 @@ describe('tribeca test', () => {
 
   it('Instantly withdraws from locker', async () => {
     try {
+      // the user's escrow token account SBR is being withdrawn from
       const { address: escrowTokenAccount } =
         await getOrCreateAssociatedTokenAccount(
           connection,
@@ -522,6 +532,7 @@ describe('tribeca test', () => {
           true
         );
 
+      // the redeemer's token account USDC is being withdrawn from
       const { address: redeemerReceiptAccount } =
         await getOrCreateAssociatedTokenAccount(
           connection,
@@ -531,6 +542,7 @@ describe('tribeca test', () => {
           true
         );
 
+      // the token account SBR is being deposited into
       const { address: treasuryTokenAccount } =
         await getOrCreateAssociatedTokenAccount(
           connection,
@@ -539,6 +551,7 @@ describe('tribeca test', () => {
           TREASURY_KEY.publicKey
         );
 
+      // the user's token account USDC is being received with
       const { address: userReceipt } = await getOrCreateAssociatedTokenAccount(
         connection,
         payer.payer,

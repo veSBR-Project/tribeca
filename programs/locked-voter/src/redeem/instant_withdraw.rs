@@ -90,12 +90,14 @@ impl<'info> InstantWithdraw<'info> {
         // Ensure the escrow has tokens
         invariant!(self.escrow.amount > 0, "Escrow is empty");
         invariant!(self.blacklist.timestamp == 0, "Escrow account blacklisted");
+        invariant!(
+            self.escrow.escrow_started_at < self.redeemer.cutoff_date,
+            "This escrow is too recent to be redeemed"
+        );
         Ok(())
     }
 
     pub fn instant_withdraw(&mut self) -> Result<()> {
-        invariant!(self.escrow.amount > 0, "Escrow is empty");
-
         let base_amount = self.escrow.amount;
         let ve_sbr_amount = self.escrow.voting_power(&self.locker.params)?;
         let redemption_rate = self

@@ -41,6 +41,8 @@ pub struct LockerRedeemer {
     pub treasury: Pubkey,
     /// amount of funds in the redeemer
     pub amount: u64,
+    /// escrows started after this date will be barred from redemption
+    pub cutoff_date: i64,
 }
 
 /// A group of [Escrow]s.

@@ -57,7 +57,12 @@ pub struct CreateRedeemer<'info> {
 
 /// Creates a new locker redeemer account.
 impl<'info> CreateRedeemer<'info> {
-    pub fn create_redeemer(&mut self, redemption_rate: u64, bump: u8) -> Result<()> {
+    pub fn create_redeemer(
+        &mut self,
+        redemption_rate: u64,
+        cutoff_date: i64,
+        bump: u8,
+    ) -> Result<()> {
         let redeemer = &mut self.redeemer;
 
         redeemer.locker = self.locker.key();
@@ -67,6 +72,7 @@ impl<'info> CreateRedeemer<'info> {
         redeemer.status = 1; // active
         redeemer.redemption_rate = redemption_rate;
         redeemer.treasury = self.treasury_token_account.key();
+        redeemer.cutoff_date = cutoff_date;
         redeemer.bump = bump;
 
         msg!("Created locker redeemer for locker {}", self.locker.key());

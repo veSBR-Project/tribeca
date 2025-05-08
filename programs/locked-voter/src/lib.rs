@@ -145,9 +145,14 @@ pub mod locked_voter {
     }
 
     /// Creates a new [LockerRedeemer].
-    pub fn create_redeemer(ctx: Context<CreateRedeemer>, claim_rate: u64, _bump: u8) -> Result<()> {
+    pub fn create_redeemer(
+        ctx: Context<CreateRedeemer>,
+        claim_rate: u64,
+        cutoff_date: i64,
+        _bump: u8,
+    ) -> Result<()> {
         ctx.accounts
-            .create_redeemer(claim_rate, unwrap_bump!(ctx, "redeemer"))
+            .create_redeemer(claim_rate, cutoff_date, unwrap_bump!(ctx, "redeemer"))
     }
 
     /// Updates the admin of a [LockerRedeemer].
