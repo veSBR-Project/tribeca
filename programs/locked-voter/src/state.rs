@@ -36,7 +36,7 @@ pub struct LockerRedeemer {
     /// status of the redeemer
     pub status: u8, // 0 = paused, 1 = active
     /// redemption rate multiplier
-    pub redemption_rate: u64, // e.g 1000veSBR = 1 USDC
+    pub redemption_rate: u64, // e.g 10000 veSBR = 1 USDC
     /// treasury address
     pub treasury: Pubkey,
     /// amount of funds in the redeemer

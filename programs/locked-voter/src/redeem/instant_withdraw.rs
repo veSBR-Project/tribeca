@@ -100,11 +100,7 @@ impl<'info> InstantWithdraw<'info> {
     pub fn instant_withdraw(&mut self) -> Result<()> {
         let base_amount = self.escrow.amount;
         let ve_sbr_amount = self.escrow.voting_power(&self.locker.params)?;
-        let redemption_rate = self
-            .redeemer
-            .redemption_rate
-            .checked_mul(10u64.pow(self.receipt_mint.decimals as u32))
-            .unwrap();
+        let redemption_rate = self.redeemer.redemption_rate;
         let receipt_amount = ve_sbr_amount.checked_div(redemption_rate).unwrap();
 
         let escrow_seeds: &[&[&[u8]]] = escrow_seeds!(self.escrow);

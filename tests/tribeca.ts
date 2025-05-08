@@ -35,14 +35,14 @@ anchor.setProvider(provider);
 const payer = provider.wallet as anchor.Wallet;
 const connection = new Connection(RPC_URL, 'confirmed');
 
+// TODO: Make sure to update this accuratelyfor mainnet
+const REDEMPTION_RATE = 10000; // 1 USDC = 10000 veSBR
+
 const BASE_KEY = Keypair.generate();
 const TREASURY_KEY = Keypair.generate();
 
 let SBR_MINT: anchor.web3.PublicKey;
 let USDC_MINT: anchor.web3.PublicKey;
-
-let REWARD_VAULT_SBR_PDA: anchor.web3.PublicKey;
-let REWARD_VAULT_USDC_PDA: anchor.web3.PublicKey;
 
 let GOKI_SMART_WALLET_PDA: anchor.web3.PublicKey;
 let GOKI_SMART_WALLET_BUMP: number;
@@ -163,6 +163,8 @@ describe('tribeca test', () => {
         createSmartWalletInstruction,
         createGovernorInstruction,
         tribecaGovernorPDA,
+        gokiSmartWalletPDA,
+        gokiSmartWalletBump,
       } = await sdk.createSmartWalletAndGovernor(payer, BASE_KEY.publicKey, {
         maxOwners,
         threshold,
@@ -175,6 +177,8 @@ describe('tribeca test', () => {
       });
 
       TRIBECA_GOVERNOR_PDA = tribecaGovernorPDA;
+      GOKI_SMART_WALLET_PDA = gokiSmartWalletPDA;
+      GOKI_SMART_WALLET_BUMP = gokiSmartWalletBump;
 
       const transaction = new anchor.web3.Transaction();
       transaction.add(createSmartWalletInstruction, createGovernorInstruction);
@@ -255,7 +259,7 @@ describe('tribeca test', () => {
           payer.publicKey,
           LOCKER_PDA,
           USDC_MINT,
-          new BN(1000), // redemption rate multiplier -  1 USDC = 1000 veSBR
+          new BN(REDEMPTION_RATE), // redemption rate multiplier -  1 USDC = 1000 veSBR
           new BN(Date.now() + 14 * 24 * 60 * 60 * 1000), // two weeks from now
           treasuryTokenAccount
         );
