@@ -1194,17 +1194,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple-voter"
-version = "0.5.8"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "govern",
- "smart-wallet",
- "vipers",
-]
-
-[[package]]
 name = "smallvec"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1529,15 +1518,6 @@ checksum = "7b17e741662c70c8bd24ac5c5b18de314a2c26c32bf8346ee1e6f53de919c283"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "whitelist-tester"
-version = "0.5.6"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "locked-voter",
 ]
 
 [[package]]

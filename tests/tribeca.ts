@@ -35,8 +35,11 @@ anchor.setProvider(provider);
 const payer = provider.wallet as anchor.Wallet;
 const connection = new Connection(RPC_URL, 'confirmed');
 
+const { BN } = anchor.default;
+
 // TODO: Make sure to update this accuratelyfor mainnet
 const REDEMPTION_RATE = 10000; // 1 USDC = 10000 veSBR
+const CUTOFF_DATE = new BN(Date.now() + 14 * 24 * 60 * 60 * 1000); // two weeks from now
 
 const BASE_KEY = Keypair.generate();
 const TREASURY_KEY = Keypair.generate();
@@ -58,8 +61,6 @@ let ESCROW_BUMP: number;
 
 let REDEEMER_PDA: anchor.web3.PublicKey;
 let REDEEMER_BUMP: number;
-
-const { BN } = anchor.default;
 
 describe('tribeca test', () => {
   const provider = anchor.AnchorProvider.env();
@@ -260,7 +261,7 @@ describe('tribeca test', () => {
           LOCKER_PDA,
           USDC_MINT,
           new BN(REDEMPTION_RATE), // redemption rate multiplier -  1 USDC = 1000 veSBR
-          new BN(Date.now() + 14 * 24 * 60 * 60 * 1000), // two weeks from now
+          CUTOFF_DATE,
           treasuryTokenAccount
         );
 
