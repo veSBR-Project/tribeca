@@ -185,6 +185,11 @@ pub mod locked_voter {
         ctx.accounts.add_funds(amount)
     }
 
+    /// Removes all receipt mint tokens from the redeemer PDA token account.
+    pub fn remove_all_funds(ctx: Context<RemoveAllFunds>) -> Result<()> {
+        ctx.accounts.remove_all_funds()
+    }
+
     /// Toggles the status of a [LockerRedeemer] between active and paused.
     pub fn toggle_redeemer(ctx: Context<ToggleRedeemer>, toggle_to: u8) -> Result<()> {
         ctx.accounts.toggle_redeemer(toggle_to)

@@ -8,3 +8,8 @@ anchor deploy
 # anchor deploy --program-name saber-lock --program-keypair ./test-keypair.json
 anchor test --skip-build --skip-deploy --skip-local-validator
 
+# solana-test-validator \
+#   --bpf-program GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH ~/tribeca1.so \
+#   --bpf-program Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw ~/tribeca2.so \
+#   --bpf-program LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw ~/tribeca3.so 
+#   --reset 

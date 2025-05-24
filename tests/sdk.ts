@@ -420,6 +420,44 @@ export class TribecaSDK {
   }
 
   /**
+   * Remove all funds from locker redeemer
+   * @param payer - The payer of the transaction
+   * @param locker - The locker account
+   * @param redeemer - The redeemer account
+   * @param redeemerReceiptAccount - The redeemer receipt token account
+   * @param destinationTokenAccount - The destination token account
+   * @returns - The instruction to remove all funds
+   */
+  async removeAllFunds(
+    payer: PublicKey,
+    locker: PublicKey,
+    redeemer: PublicKey,
+    redeemerReceiptAccount: PublicKey,
+    destinationTokenAccount: PublicKey
+  ) {
+    try {
+      const removeAllFundsInstruction = await this.tribecaProgram.methods
+        .removeAllFunds()
+        .accounts({
+          locker: locker,
+          redeemer: redeemer,
+          redeemerReceiptAccount: redeemerReceiptAccount,
+          destinationTokenAccount: destinationTokenAccount,
+          payer: payer,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .instruction();
+
+      return {
+        removeAllFundsInstruction,
+      };
+    } catch (error) {
+      console.error('Error removing all funds', error);
+      throw error;
+    }
+  }
+
+  /**
    * Instant withdraw from locker
    * @param payer - The payer of the transaction
    * @param locker - The locker account
