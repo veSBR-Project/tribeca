@@ -19,6 +19,7 @@ pub struct InstantWithdraw<'info> {
     /// The [Escrow] that tokens are being withdrawn from.
     #[account(
         mut,
+        close = payer,
         has_one = locker,
         constraint = escrow.owner == payer.key(),
     )]
@@ -108,11 +109,6 @@ impl<'info> InstantWithdraw<'info> {
         require!(
             self.escrow.escrow_started_at < self.redeemer.cutoff_date,
             LockedVoterError::EscrowTooRecent
-        );
-
-        require!(
-            self.blacklist.timestamp == 0,
-            LockedVoterError::EscrowBlacklisted
         );
 
         Ok(())

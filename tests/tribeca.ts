@@ -588,9 +588,9 @@ describe('tribeca test', () => {
 
       console.log('Transaction sent and confirmed', tx);
 
-      // get the escrow account
-      const escrow = await sdk.tribecaProgram.account.escrow.fetch(ESCROW_PDA);
-      console.log('Escrow', escrow);
+      // // get the escrow account
+      // const escrow = await sdk.tribecaProgram.account.escrow.fetch(ESCROW_PDA);
+      // console.log('Escrow', escrow);
 
       // get the redeemer account
       const redeemer =
