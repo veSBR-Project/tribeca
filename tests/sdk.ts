@@ -501,7 +501,6 @@ export class TribecaSDK {
           userReceipt: userReceipt,
           payer: payer,
           tokenProgram: TOKEN_PROGRAM_ID,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
           systemProgram: SystemProgram.programId,
         })
         .instruction();

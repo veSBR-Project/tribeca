@@ -51,7 +51,6 @@ pub struct CreateRedeemer<'info> {
     )]
     pub program_data: Account<'info, ProgramData>,
 
-    /// System program.
     pub system_program: Program<'info, System>,
 }
 
@@ -63,6 +62,13 @@ impl<'info> CreateRedeemer<'info> {
         cutoff_date: i64,
         bump: u8,
     ) -> Result<()> {
+        require!(redemption_rate != 0, ErrorCode::InvalidRedemptionRate);
+
+        let current_time = Clock::get()?.unix_timestamp;
+        msg!("Current time: {}", current_time);
+        msg!("Cutoff date: {}", cutoff_date);
+        require!(cutoff_date < current_time, ErrorCode::InvalidCutoffDate);
+
         let redeemer = &mut self.redeemer;
 
         redeemer.locker = self.locker.key();
@@ -78,4 +84,13 @@ impl<'info> CreateRedeemer<'info> {
         msg!("Created locker redeemer for locker {}", self.locker.key());
         Ok(())
     }
+}
+
+// Define error codes
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Redemption rate must be greater than zero.")]
+    InvalidRedemptionRate,
+    #[msg("Cutoff date must be in the past.")]
+    InvalidCutoffDate,
 }

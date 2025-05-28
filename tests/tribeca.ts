@@ -37,9 +37,9 @@ const connection = new Connection(RPC_URL, 'confirmed');
 
 const { BN } = anchor.default;
 
-// TODO: Make sure to update this accuratelyfor mainnet
+// TODO: Make sure to update this accurately for mainnet
 const REDEMPTION_RATE = 10000; // 1 USDC = 10000 veSBR
-const CUTOFF_DATE = new BN(Date.now() + 14 * 24 * 60 * 60 * 1000); // two weeks from now
+const CUTOFF_DATE = new BN(Math.floor(Date.now() / 1000) - 60 * 24 * 60 * 60); // two months ago
 
 const BASE_KEY = Keypair.generate();
 const TREASURY_KEY = Keypair.generate();

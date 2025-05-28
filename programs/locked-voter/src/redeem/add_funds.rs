@@ -1,4 +1,6 @@
+use crate::errors::LockedVoterError;
 use crate::*;
+use anchor_spl::associated_token::get_associated_token_address;
 
 /// Accounts for [locked_voter::add_funds].
 #[derive(Accounts)]
@@ -39,6 +41,14 @@ pub struct AddFunds<'info> {
 
 impl<'info> AddFunds<'info> {
     pub fn add_funds(&mut self, amount: u64) -> Result<()> {
+        let redeemer_ata =
+            get_associated_token_address(&self.redeemer.key(), &self.redeemer.receipt_mint);
+
+        require!(
+            redeemer_ata == self.redeemer_receipt_account.key(),
+            LockedVoterError::InvalidTokenAccount,
+        );
+
         // Transfer tokens from source to redeemer receipt account
         anchor_spl::token::transfer(
             CpiContext::new(
@@ -50,10 +60,15 @@ impl<'info> AddFunds<'info> {
                 },
             ),
             amount,
-        )?;
+        )
+        .map_err(|_| LockedVoterError::OperationFailed)?;
 
         // Update the redeemer balance
-        self.redeemer.amount = self.redeemer.amount.checked_add(amount).unwrap();
+        self.redeemer.amount = self
+            .redeemer
+            .amount
+            .checked_add(amount)
+            .ok_or(LockedVoterError::OperationFailed)?;
 
         // Emit an event for the funds addition
         emit!(AddFundsEvent {

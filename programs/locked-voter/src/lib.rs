@@ -10,6 +10,7 @@ use anchor_spl::token::{Mint, Token, TokenAccount};
 use govern::{Governor, Proposal, Vote};
 use vipers::prelude::*;
 
+mod errors;
 mod instructions;
 pub mod locker;
 mod redeem;

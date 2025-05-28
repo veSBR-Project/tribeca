@@ -1,4 +1,6 @@
+use crate::errors::LockedVoterError;
 use crate::*;
+use anchor_spl::associated_token::get_associated_token_address;
 
 /// Accounts for [locked_voter::instant_withdraw].
 #[derive(Accounts)]
@@ -11,7 +13,6 @@ pub struct InstantWithdraw<'info> {
     #[account(
         mut,
         constraint = redeemer.locker == locker.key(),
-        constraint = redeemer.status == 1 @ErrorCode::RedeemerNotActive
     )]
     pub redeemer: Box<Account<'info, LockerRedeemer>>,
 
@@ -35,7 +36,7 @@ pub struct InstantWithdraw<'info> {
         ],
         bump,
     )]
-    pub blacklist: Box<Account<'info, Blacklist>>,
+    pub blacklist: Account<'info, Blacklist>,
 
     /// The receipt token [Mint].
     #[account(mut)]
@@ -78,22 +79,42 @@ pub struct InstantWithdraw<'info> {
     /// Program to create the receipt token mint.
     pub token_program: Program<'info, Token>,
 
-    /// Clock to get the current time.
-    pub clock: Sysvar<'info, Clock>,
-
     /// System program.
     pub system_program: Program<'info, System>,
 }
 
 impl<'info> InstantWithdraw<'info> {
     pub fn validate(&self) -> Result<()> {
-        // Ensure the escrow has tokens
-        invariant!(self.escrow.amount > 0, "Escrow is empty");
-        invariant!(self.blacklist.timestamp == 0, "Escrow account blacklisted");
-        invariant!(
-            self.escrow.escrow_started_at < self.redeemer.cutoff_date,
-            "This escrow is too recent to be redeemed"
+        let redeemer_ata =
+            get_associated_token_address(&self.redeemer.key(), &self.redeemer.receipt_mint);
+
+        require!(
+            redeemer_ata == self.redeemer_receipt_account.key(),
+            LockedVoterError::InvalidTokenAccount,
         );
+
+        require!(
+            self.redeemer.status == 1,
+            LockedVoterError::RedeemerNotActive
+        );
+
+        require!(self.escrow.amount > 0, LockedVoterError::EscrowEmpty);
+
+        require!(
+            self.blacklist.timestamp == 0,
+            LockedVoterError::EscrowBlacklisted
+        );
+
+        require!(
+            self.escrow.escrow_started_at < self.redeemer.cutoff_date,
+            LockedVoterError::EscrowTooRecent
+        );
+
+        require!(
+            self.blacklist.timestamp == 0,
+            LockedVoterError::EscrowBlacklisted
+        );
+
         Ok(())
     }
 
@@ -146,7 +167,7 @@ impl<'info> InstantWithdraw<'info> {
         self.blacklist.locker = self.locker.key();
         self.blacklist.escrow = self.escrow.key();
         self.blacklist.owner = self.payer.key();
-        self.blacklist.timestamp = self.clock.unix_timestamp;
+        self.blacklist.timestamp = Clock::get()?.unix_timestamp;
 
         // Emit an event for the withdrawal
         emit!(InstantWithdrawEvent {
@@ -154,7 +175,7 @@ impl<'info> InstantWithdraw<'info> {
             escrow: self.escrow.key(),
             owner: self.payer.key(),
             amount: receipt_amount,
-            timestamp: self.clock.unix_timestamp,
+            timestamp: Clock::get()?.unix_timestamp
         });
 
         Ok(())
@@ -177,10 +198,4 @@ pub struct InstantWithdrawEvent {
     pub amount: u64,
     /// The time of withdrawal.
     pub timestamp: i64,
-}
-
-#[error_code]
-enum ErrorCode {
-    #[msg("Redeemer is currently paused")]
-    RedeemerNotActive,
 }

@@ -1,3 +1,4 @@
+use crate::errors::LockedVoterError;
 use crate::*;
 
 /// Accounts for [locked_voter::add_blacklist_entry].
@@ -13,7 +14,10 @@ pub struct AddBlacklistEntry<'info> {
     )]
     pub redeemer: Account<'info, LockerRedeemer>,
 
-    /// The [Escrow] to blacklist.
+    #[account(
+        mut,
+        has_one = locker,
+    )]
     pub escrow: Account<'info, Escrow>,
 
     /// The [Blacklist] account to create.
@@ -33,7 +37,6 @@ pub struct AddBlacklistEntry<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 impl<'info> AddBlacklistEntry<'info> {
@@ -42,7 +45,7 @@ impl<'info> AddBlacklistEntry<'info> {
         self.blacklist.locker = self.locker.key();
         self.blacklist.escrow = self.escrow.key();
         self.blacklist.owner = self.escrow.owner;
-        self.blacklist.timestamp = self.clock.unix_timestamp;
+        self.blacklist.timestamp = Clock::get()?.unix_timestamp;
 
         // Emit an event for the blacklist addition
         emit!(AddBlacklistEntryEvent {
@@ -50,7 +53,7 @@ impl<'info> AddBlacklistEntry<'info> {
             escrow: self.escrow.key(),
             owner: self.escrow.owner,
             admin: self.payer.key(),
-            timestamp: self.clock.unix_timestamp,
+            timestamp: Clock::get()?.unix_timestamp
         });
 
         Ok(())

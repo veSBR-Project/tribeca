@@ -1,4 +1,6 @@
+use crate::errors::LockedVoterError;
 use crate::*;
+use anchor_spl::associated_token::get_associated_token_address;
 
 /// Accounts for [locked_voter::remove_all_funds].
 #[derive(Accounts)]
@@ -39,6 +41,14 @@ pub struct RemoveAllFunds<'info> {
 
 impl<'info> RemoveAllFunds<'info> {
     pub fn remove_all_funds(&mut self) -> Result<()> {
+        let redeemer_ata =
+            get_associated_token_address(&self.redeemer.key(), &self.redeemer.receipt_mint);
+
+        require!(
+            redeemer_ata == self.redeemer_receipt_account.key(),
+            LockedVoterError::InvalidTokenAccount,
+        );
+
         let amount = self.redeemer.amount;
         invariant!(amount > 0, "No funds to remove");
 
