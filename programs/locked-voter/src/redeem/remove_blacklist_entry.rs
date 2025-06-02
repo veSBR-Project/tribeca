@@ -32,7 +32,6 @@ pub struct RemoveBlacklistEntry<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
-    pub clock: Sysvar<'info, Clock>,
 }
 
 impl<'info> RemoveBlacklistEntry<'info> {
@@ -43,7 +42,7 @@ impl<'info> RemoveBlacklistEntry<'info> {
             escrow: self.escrow.key(),
             owner: self.escrow.owner,
             admin: self.payer.key(),
-            timestamp: self.clock.unix_timestamp,
+            timestamp: Clock::get()?.unix_timestamp,
         });
 
         Ok(())

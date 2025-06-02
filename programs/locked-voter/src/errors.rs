@@ -18,4 +18,8 @@ pub enum LockedVoterError {
     EscrowBlacklisted,
     #[msg("This escrow is too recent to be redeemed.")]
     EscrowTooRecent,
+    #[msg("Redemption rate must be greater than 0.")]
+    InvalidRedemptionRate,
+    #[msg("Redemption rate must be different from the previous rate.")]
+    RedemptionRateSameAsPrevious,
 }

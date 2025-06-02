@@ -1,3 +1,4 @@
+use crate::errors::LockedVoterError;
 use crate::*;
 
 /// Accounts for updating a locker redeemer's redemption rate.
@@ -23,6 +24,12 @@ pub struct UpdateRedemptionRate<'info> {
 impl<'info> UpdateRedemptionRate<'info> {
     pub fn update_redemption_rate(&mut self, new_rate: u64) -> Result<()> {
         let redeemer = &mut self.redeemer;
+
+        require!(new_rate > 0, LockedVoterError::InvalidRedemptionRate);
+        require!(
+            new_rate != redeemer.redemption_rate,
+            LockedVoterError::RedemptionRateSameAsPrevious
+        );
 
         let previous_rate = redeemer.redemption_rate;
 

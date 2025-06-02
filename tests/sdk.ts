@@ -587,7 +587,6 @@ export class TribecaSDK {
           blacklist: blacklistPDA,
           payer: payer,
           systemProgram: SystemProgram.programId,
-          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
         })
         .instruction();
 
