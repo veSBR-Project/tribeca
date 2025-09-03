@@ -55,3 +55,35 @@ The official documentation is hosted at [docs.tribeca.so.](https://docs.tribeca.
 Tribeca Protocol is licensed under the GNU Affero General Public License v3.0.
 
 In short, this means that any changes to this code must be made open source and available under the AGPL-v3.0 license, even if only used privately. If you have a need to use this program and cannot respect the terms of the license, please message us our team directly at [team@tribeca.so](mailto:team@tribeca.so).
+
+
+## UPDATE - Building for localnet
+
+# Step 1 - Create Solana directory
+mkdir -p ~/.solana-1.9.12
+
+# Step 2 - Install specific Anchor + Solana
+
+# Anchor 0.24.2
+cargo install --git https://github.com/coral-xyz/anchor \
+  --tag v0.24.2 --locked \
+  --root ~/.anchor-0.24.2 anchor-cli
+
+# Solana 1.9.12 
+curl -L https://github.com/solana-labs/solana/releases/download/v1.9.12/solana-release-aarch64-apple-darwin.tar.bz2 \
+  | tar -xj -C ~/.solana-1.9.12 --strip-components=1
+
+# Step 3 - Navigate to Tribeca root and make scripts executable
+cd /path/to/tribeca
+chmod +x test_validator.sh
+chmod +x test.sh
+chmod +x test_build.sh
+
+# Step 4 - Run build + tests with pinned versions
+
+# Terminal 1: start validator with Solana 1.9.12
+./test_validator.sh
+
+# Terminal 2: build + run tests with Anchor 0.24.2 + Solana 1.9.12
+./test_build.sh
+./test.sh
