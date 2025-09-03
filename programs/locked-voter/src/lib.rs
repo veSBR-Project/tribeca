@@ -21,7 +21,7 @@ pub use redeem::*;
 pub use state::*;
 
 // declare_id!("LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw");
-declare_id!("8tAhS8CX7if6tQWAqUSK1kebGbU1WCH3jBwafq2bifMw");
+declare_id!("CoeW4g9B2CPCVvJyf7LfyKET76FXLiU2Ci3iKJHPHDy9");
 
 /// Locked voter program.
 #[deny(missing_docs)]

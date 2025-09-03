@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Volumes/T7/coding/tribeca/target/debug/build/typenum-16148118a30199ee/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Volumes/T7/coding/tribeca/target/debug/build/typenum-16148118a30199ee/out/op.rs

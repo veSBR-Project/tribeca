@@ -6,6 +6,6 @@ export const RPC_URL = 'http://localhost:8899';
 // export const LOCKED_V_PROGRAM = 'LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw';
 
 // devnet
-export const GOVERNOR_PROGRAM = 'EAY5qg4uiooRaTGGZNNTGiSuQPubjsaWuV6m2KkjiskU';
+export const GOVERNOR_PROGRAM = '9q26gg2yPZy6qv5dbKyPqUe4sZZcvhyLsZNTW6H3qvrw';
 export const GOKI_PROGRAM = 'GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH';
-export const LOCKED_V_PROGRAM = '8tAhS8CX7if6tQWAqUSK1kebGbU1WCH3jBwafq2bifMw';
+export const LOCKED_V_PROGRAM = 'CoeW4g9B2CPCVvJyf7LfyKET76FXLiU2Ci3iKJHPHDy9';

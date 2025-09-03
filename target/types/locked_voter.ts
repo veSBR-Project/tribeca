@@ -1,0 +1,3753 @@
+export type LockedVoter = {
+  "version": "0.5.8",
+  "name": "locked_voter",
+  "instructions": [
+    {
+      "name": "newLocker",
+      "accounts": [
+        {
+          "name": "base",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "base"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "newEscrow",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Escrow"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "escrow_owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "lock",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "sourceTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockWithWhitelist",
+      "accounts": [
+        {
+          "name": "lock",
+          "accounts": [
+            {
+              "name": "locker",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrow",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowOwner",
+              "isMut": false,
+              "isSigner": true
+            },
+            {
+              "name": "sourceTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockWithWhitelistEntry",
+      "accounts": [
+        {
+          "name": "lock",
+          "accounts": [
+            {
+              "name": "locker",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrow",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowOwner",
+              "isMut": false,
+              "isSigner": true
+            },
+            {
+              "name": "sourceTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockPermissionless",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "sourceTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "exit",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "activateProposal",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "governProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "castVote",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "voteDelegate",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setVoteDelegate",
+      "accounts": [
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newDelegate",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "setLockerParams",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "approveProgramLockPrivilege",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "LockerWhitelistEntry"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "executable_id"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "whitelisted_owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "executableId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistedOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "revokeProgramLockPrivilege",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "instantWithdraw",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiptMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userReceipt",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createRedeemer",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Redeemer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "anchor_spl :: token :: Mint",
+                "path": "receipt_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiptMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programData",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "claimRate",
+          "type": "u64"
+        },
+        {
+          "name": "cutoffDate",
+          "type": "i64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateRedeemerAdmin",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "currentAdmin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newAdmin",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "acceptRedeemerAdmin",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pendingAdmin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateTreasury",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newTreasury",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addBlacklistEntry",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "removeBlacklistEntry",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addFunds",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "removeAllFunds",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "toggleRedeemer",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "toggleTo",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateRedemptionRate",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newRate",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "blacklist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lockerRedeemer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "pendingAdmin",
+            "type": "publicKey"
+          },
+          {
+            "name": "receiptMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "redemptionRate",
+            "type": "u64"
+          },
+          {
+            "name": "treasury",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "cutoffDate",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "locker",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "base",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "tokenMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "lockedSupply",
+            "type": "u64"
+          },
+          {
+            "name": "governor",
+            "type": "publicKey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "LockerParams"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "lockerWhitelistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "programId",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "tokens",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "escrowStartedAt",
+            "type": "i64"
+          },
+          {
+            "name": "escrowEndsAt",
+            "type": "i64"
+          },
+          {
+            "name": "voteDelegate",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "LockerParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "whitelistEnabled",
+            "type": "bool"
+          },
+          {
+            "name": "maxStakeVoteMultiplier",
+            "type": "u8"
+          },
+          {
+            "name": "minStakeDuration",
+            "type": "u64"
+          },
+          {
+            "name": "maxStakeDuration",
+            "type": "u64"
+          },
+          {
+            "name": "proposalActivationMinVotes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "InvalidRedemptionRate"
+          },
+          {
+            "name": "InvalidCutoffDate"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProgramNotWhitelisted"
+          },
+          {
+            "name": "LockupDurationTooShort"
+          },
+          {
+            "name": "LockupDurationTooLong"
+          },
+          {
+            "name": "RefreshCannotShorten"
+          },
+          {
+            "name": "EscrowNotEnded"
+          },
+          {
+            "name": "MustProvideWhitelist"
+          },
+          {
+            "name": "EscrowOwnerNotWhitelisted"
+          },
+          {
+            "name": "MustCallLockWithWhitelistEntry"
+          },
+          {
+            "name": "MustCallLockPermissionless"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "ApproveLockPrivilegeEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "programId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ExitEscrowEvent",
+      "fields": [
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "lockerSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "releasedAmount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LockEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "tokenMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "lockerSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "duration",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "prevEscrowEndsAt",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "nextEscrowEndsAt",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "nextEscrowStartedAt",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "NewEscrowEvent",
+      "fields": [
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "NewLockerEvent",
+      "fields": [
+        {
+          "name": "governor",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "tokenMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RevokeLockPrivilegeEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "programId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LockerSetParamsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "prevParams",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "SetVoteDelegateEvent",
+      "fields": [
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "oldDelegate",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newDelegate",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AddBlacklistEntryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AddFundsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "receiptMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "InstantWithdrawEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RemoveAllFundsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "receiptMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RemoveBlacklistEntryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ToggleRedeemerEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newStatus",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateRedemptionRateEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "previousRate",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "newRate",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateTreasuryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "previousTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTokenAccount",
+      "msg": "Invalid token account."
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds."
+    },
+    {
+      "code": 6002,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6003,
+      "name": "OperationFailed",
+      "msg": "Operation failed."
+    },
+    {
+      "code": 6004,
+      "name": "RedeemerNotActive",
+      "msg": "Redeemer is not active."
+    },
+    {
+      "code": 6005,
+      "name": "EscrowEmpty",
+      "msg": "Escrow is empty."
+    },
+    {
+      "code": 6006,
+      "name": "EscrowBlacklisted",
+      "msg": "Escrow account blacklisted."
+    },
+    {
+      "code": 6007,
+      "name": "EscrowTooRecent",
+      "msg": "This escrow is too recent to be redeemed."
+    },
+    {
+      "code": 6008,
+      "name": "InvalidRedemptionRate",
+      "msg": "Redemption rate must be greater than 0."
+    },
+    {
+      "code": 6009,
+      "name": "RedemptionRateSameAsPrevious",
+      "msg": "Redemption rate must be different from the previous rate."
+    }
+  ]
+};
+
+export const IDL: LockedVoter = {
+  "version": "0.5.8",
+  "name": "locked_voter",
+  "instructions": [
+    {
+      "name": "newLocker",
+      "accounts": [
+        {
+          "name": "base",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "base"
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "newEscrow",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Escrow"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "escrow_owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "lock",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "sourceTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockWithWhitelist",
+      "accounts": [
+        {
+          "name": "lock",
+          "accounts": [
+            {
+              "name": "locker",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrow",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowOwner",
+              "isMut": false,
+              "isSigner": true
+            },
+            {
+              "name": "sourceTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockWithWhitelistEntry",
+      "accounts": [
+        {
+          "name": "lock",
+          "accounts": [
+            {
+              "name": "locker",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrow",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "escrowOwner",
+              "isMut": false,
+              "isSigner": true
+            },
+            {
+              "name": "sourceTokens",
+              "isMut": true,
+              "isSigner": false
+            },
+            {
+              "name": "tokenProgram",
+              "isMut": false,
+              "isSigner": false
+            }
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "lockPermissionless",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "sourceTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "duration",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "exit",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "activateProposal",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "governProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "castVote",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "voteDelegate",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "proposal",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "governProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setVoteDelegate",
+      "accounts": [
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newDelegate",
+          "type": "publicKey"
+        }
+      ]
+    },
+    {
+      "name": "setLockerParams",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "approveProgramLockPrivilege",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "LockerWhitelistEntry"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "executable_id"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "path": "whitelisted_owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "executableId",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistedOwner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "revokeProgramLockPrivilege",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "whitelistEntry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "governor",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "smartWallet",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "instantWithdraw",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiptMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokens",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userReceipt",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createRedeemer",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Redeemer"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "anchor_spl :: token :: Mint",
+                "path": "receipt_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "receiptMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "treasuryTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programData",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "claimRate",
+          "type": "u64"
+        },
+        {
+          "name": "cutoffDate",
+          "type": "i64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateRedeemerAdmin",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "currentAdmin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newAdmin",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "acceptRedeemerAdmin",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "pendingAdmin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateTreasury",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newTreasury",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addBlacklistEntry",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "removeBlacklistEntry",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "blacklist",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "Blacklist"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Locker",
+                "path": "locker"
+              },
+              {
+                "kind": "account",
+                "type": "publicKey",
+                "account": "Escrow",
+                "path": "escrow"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "addFunds",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "sourceTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "removeAllFunds",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "toggleRedeemer",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "toggleTo",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateRedemptionRate",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "newRate",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "blacklist",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lockerRedeemer",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "pendingAdmin",
+            "type": "publicKey"
+          },
+          {
+            "name": "receiptMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "redemptionRate",
+            "type": "u64"
+          },
+          {
+            "name": "treasury",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "cutoffDate",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "locker",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "base",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "tokenMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "lockedSupply",
+            "type": "u64"
+          },
+          {
+            "name": "governor",
+            "type": "publicKey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "LockerParams"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "lockerWhitelistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "programId",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "locker",
+            "type": "publicKey"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "tokens",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "escrowStartedAt",
+            "type": "i64"
+          },
+          {
+            "name": "escrowEndsAt",
+            "type": "i64"
+          },
+          {
+            "name": "voteDelegate",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "LockerParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "whitelistEnabled",
+            "type": "bool"
+          },
+          {
+            "name": "maxStakeVoteMultiplier",
+            "type": "u8"
+          },
+          {
+            "name": "minStakeDuration",
+            "type": "u64"
+          },
+          {
+            "name": "maxStakeDuration",
+            "type": "u64"
+          },
+          {
+            "name": "proposalActivationMinVotes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "InvalidRedemptionRate"
+          },
+          {
+            "name": "InvalidCutoffDate"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProgramNotWhitelisted"
+          },
+          {
+            "name": "LockupDurationTooShort"
+          },
+          {
+            "name": "LockupDurationTooLong"
+          },
+          {
+            "name": "RefreshCannotShorten"
+          },
+          {
+            "name": "EscrowNotEnded"
+          },
+          {
+            "name": "MustProvideWhitelist"
+          },
+          {
+            "name": "EscrowOwnerNotWhitelisted"
+          },
+          {
+            "name": "MustCallLockWithWhitelistEntry"
+          },
+          {
+            "name": "MustCallLockPermissionless"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "ApproveLockPrivilegeEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "programId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ExitEscrowEvent",
+      "fields": [
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "lockerSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "releasedAmount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LockEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "tokenMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "lockerSupply",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "duration",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "prevEscrowEndsAt",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "nextEscrowEndsAt",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "nextEscrowStartedAt",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "NewEscrowEvent",
+      "fields": [
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "NewLockerEvent",
+      "fields": [
+        {
+          "name": "governor",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "tokenMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RevokeLockPrivilegeEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "programId",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LockerSetParamsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "prevParams",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": {
+            "defined": "LockerParams"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "SetVoteDelegateEvent",
+      "fields": [
+        {
+          "name": "escrowOwner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "oldDelegate",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newDelegate",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AddBlacklistEntryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AddFundsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "receiptMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "InstantWithdrawEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RemoveAllFundsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "receiptMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RemoveBlacklistEntryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "escrow",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "owner",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "ToggleRedeemerEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newStatus",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateRedemptionRateEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "previousRate",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "newRate",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "UpdateTreasuryEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "previousTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newTreasury",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidTokenAccount",
+      "msg": "Invalid token account."
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds."
+    },
+    {
+      "code": 6002,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6003,
+      "name": "OperationFailed",
+      "msg": "Operation failed."
+    },
+    {
+      "code": 6004,
+      "name": "RedeemerNotActive",
+      "msg": "Redeemer is not active."
+    },
+    {
+      "code": 6005,
+      "name": "EscrowEmpty",
+      "msg": "Escrow is empty."
+    },
+    {
+      "code": 6006,
+      "name": "EscrowBlacklisted",
+      "msg": "Escrow account blacklisted."
+    },
+    {
+      "code": 6007,
+      "name": "EscrowTooRecent",
+      "msg": "This escrow is too recent to be redeemed."
+    },
+    {
+      "code": 6008,
+      "name": "InvalidRedemptionRate",
+      "msg": "Redemption rate must be greater than 0."
+    },
+    {
+      "code": 6009,
+      "name": "RedemptionRateSameAsPrevious",
+      "msg": "Redemption rate must be different from the previous rate."
+    }
+  ]
+};

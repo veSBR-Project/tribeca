@@ -1,41 +1,29 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
-import { Program } from '@coral-xyz/anchor-0-29.0.0';
 import * as anchor from '@coral-xyz/anchor';
-import type { Wallet as SaberWallet } from '@coral-xyz/anchor';
+const { BN } = anchor;
 import {
   mintTo,
   createMint,
   getOrCreateAssociatedTokenAccount,
-  TOKEN_PROGRAM_ID,
-  transfer,
 } from '@solana/spl-token';
 import {
   Connection,
   Keypair,
   sendAndConfirmTransaction,
+  Transaction,
 } from '@solana/web3.js';
-import { getProgram } from './helpers.ts';
+import { getProgram } from './helpers';
 import {
   GOKI_PROGRAM,
   GOVERNOR_PROGRAM,
   LOCKED_V_PROGRAM,
   RPC_URL,
-} from './constants.ts';
-import { TribecaSDK } from './sdk.ts';
+} from './constants';
+import { TribecaSDK } from './sdk';
 import { expect } from 'chai';
 
 const goki_idl = require('./goki_idl.json');
 const govern_idl = require('../target/idl/govern.json');
 const locked_voter_idl = require('../target/idl/locked_voter.json');
-
-const provider = anchor.AnchorProvider.env();
-anchor.setProvider(provider);
-const payer = provider.wallet as anchor.Wallet;
-const connection = new Connection(RPC_URL, 'confirmed');
-
-const { BN } = anchor.default;
 
 // TODO: Make sure to update this accurately for mainnet
 const REDEMPTION_RATE = 10000; // 1 USDC = 10000 veSBR
@@ -181,8 +169,9 @@ describe('tribeca test', () => {
       GOKI_SMART_WALLET_PDA = gokiSmartWalletPDA;
       GOKI_SMART_WALLET_BUMP = gokiSmartWalletBump;
 
-      const transaction = new anchor.web3.Transaction();
-      transaction.add(createSmartWalletInstruction, createGovernorInstruction);
+      const transaction = new Transaction();
+      transaction.add(createSmartWalletInstruction);
+      transaction.add(createGovernorInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
         await connection.getLatestBlockhash()
@@ -226,7 +215,7 @@ describe('tribeca test', () => {
 
       console.log('Locker PDA', LOCKER_PDA.toBase58());
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(createLockerInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -265,7 +254,7 @@ describe('tribeca test', () => {
           treasuryTokenAccount
         );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(createLockerRedeemerInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -294,7 +283,7 @@ describe('tribeca test', () => {
         payer.publicKey
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(createEscrowInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -343,7 +332,7 @@ describe('tribeca test', () => {
         new BN(60 * 60 * 24 * 7 * 52) // 52 weeks in seconds
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(lockTokensInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -397,7 +386,7 @@ describe('tribeca test', () => {
         SBR_MINT
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(unlockTokensInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -445,7 +434,7 @@ describe('tribeca test', () => {
         new BN(10000 * Math.pow(10, 6))
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(addFundsInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -477,7 +466,7 @@ describe('tribeca test', () => {
         REDEEMER_PDA
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(addBlacklistEntryInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -505,7 +494,7 @@ describe('tribeca test', () => {
           REDEEMER_PDA
         );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(removeBlacklistEntryInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -575,7 +564,7 @@ describe('tribeca test', () => {
           userReceipt
         );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(instantWithdrawInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -651,7 +640,7 @@ describe('tribeca test', () => {
           userReceipt
         );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(instantWithdrawInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -696,7 +685,7 @@ describe('tribeca test', () => {
         destinationTokenAccount
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(removeAllFundsInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -733,7 +722,7 @@ describe('tribeca test', () => {
         newTreasuryTokenAccount
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(updateTreasuryInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -761,7 +750,7 @@ describe('tribeca test', () => {
           new BN(2000)
         );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(updateRedemptionRateInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -793,7 +782,7 @@ describe('tribeca test', () => {
         1 // 0 = paused, 1 = active
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(toggleRedeemerInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -827,7 +816,7 @@ describe('tribeca test', () => {
         newAdmin.publicKey
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(updateRedeemerAdminInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (
@@ -858,7 +847,7 @@ describe('tribeca test', () => {
         REDEEMER_PDA
       );
 
-      const transaction = new anchor.web3.Transaction();
+      const transaction = new Transaction();
       transaction.add(acceptRedeemerAdminInstruction);
       transaction.feePayer = payer.publicKey;
       transaction.recentBlockhash = (

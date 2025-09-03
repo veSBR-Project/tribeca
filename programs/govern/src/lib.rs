@@ -21,7 +21,7 @@ pub use proposal::*;
 pub use state::*;
 
 // declare_id!("Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw");
-declare_id!("EAY5qg4uiooRaTGGZNNTGiSuQPubjsaWuV6m2KkjiskU");
+declare_id!("9q26gg2yPZy6qv5dbKyPqUe4sZZcvhyLsZNTW6H3qvrw");
 
 /// The [govern] program.
 #[program]

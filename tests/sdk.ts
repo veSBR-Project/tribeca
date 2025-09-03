@@ -1,9 +1,9 @@
 import { Program } from '@coral-xyz/anchor-0-29.0.0';
 import * as anchor from '@coral-xyz/anchor';
+const { BN } = anchor;
+
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-
-const { BN } = anchor.default;
 
 /**
  * Tribeca SDK

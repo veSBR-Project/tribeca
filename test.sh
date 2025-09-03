@@ -1,15 +1,7 @@
-# Dump the relevant program states from mainnet/devnet so we can test locally
-solana program dump -u m GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH ~/tribeca1.so
-solana program dump -u m Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw ~/tribeca2.so
-solana program dump -u m LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw ~/tribeca3.so
+# airdrop on localnet
+solana airdrop 100 67fMdDhsYkoGsPAxvzwqBJjdnofg3gRKCDRVk29GyX4B --url http://127.0.0.1:8899
 
-anchor build
-anchor deploy
-# anchor deploy --program-name saber-lock --program-keypair ./test-keypair.json
-anchor test --skip-build --skip-deploy --skip-local-validator
+solana program deploy ./target/deploy/locked_voter.so --keypair ./local-keypair.json
+solana program deploy ./target/deploy/govern.so --keypair ./local-keypair.json
 
-# solana-test-validator \
-#   --bpf-program GokivDYuQXPZCWRkwMhdH2h91KpDQXBEmpgBgs55bnpH ~/tribeca1.so \
-#   --bpf-program Govz1VyoyLD5BL6CSCxUJLVLsQHRwjfFj1prNsdNg5Jw ~/tribeca2.so \
-#   --bpf-program LocktDzaV1W2Bm9DeZeiyz4J9zs4fRqNiYqQyracRXw ~/tribeca3.so 
-#   --reset 
+anchor test --skip-deploy --skip-build --skip-local-validator

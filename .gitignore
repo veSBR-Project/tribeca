@@ -2,7 +2,7 @@
 .DS_Store
 
 # Ignore the build directory for Rust/Anchor
-target
+#target
 
 # Ignore backup files creates by cargo fmt.
 **/*.rs.bk
