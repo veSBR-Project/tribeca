@@ -60,30 +60,43 @@ In short, this means that any changes to this code must be made open source and 
 # UPDATE - Building for localnet
 
 ## Step 1 - Create Solana directory
+```bash
 mkdir -p ~/.solana-1.9.12
+```
 
 ## Step 2 - Install specific Anchor + Solana
 
 ### Anchor 0.24.2
+```bash
 cargo install --git https://github.com/coral-xyz/anchor \
   --tag v0.24.2 --locked \
   --root ~/.anchor-0.24.2 anchor-cli
+```
 
 ### Solana 1.9.12 
+```bash
 curl -L https://github.com/solana-labs/solana/releases/download/v1.9.12/solana-release-aarch64-apple-darwin.tar.bz2 \
   | tar -xj -C ~/.solana-1.9.12 --strip-components=1
+```
 
 ## Step 3 - Navigate to Tribeca root and make scripts executable
+```bash
 cd /path/to/tribeca
+
 chmod +x test_validator.sh
 chmod +x test.sh
 chmod +x test_build.sh
+```
 
 ## Step 4 - Run build + tests with pinned versions
 
 ### Terminal 1: start validator with Solana 1.9.12
+```bash
 ./test_validator.sh
+```
 
 ### Terminal 2: build + run tests with Anchor 0.24.2 + Solana 1.9.12
+```bash
 ./test_build.sh
 ./test.sh
+```
