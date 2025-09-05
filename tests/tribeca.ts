@@ -27,7 +27,7 @@ const locked_voter_idl = require('../target/idl/locked_voter.json');
 
 // TODO: Make sure to update this accurately for mainnet
 const REDEMPTION_RATE = 10000; // 1 USDC = 10000 veSBR
-const CUTOFF_DATE = new BN(Math.floor(Date.now() / 1000) - 60 * 24 * 60 * 60); // two months ago
+const CUTOFF_DATE = new BN(Math.floor(Date.now() / 1000) + 60 * 24 * 60 * 60); // two months in future
 
 const BASE_KEY = Keypair.generate();
 const TREASURY_KEY = Keypair.generate();
@@ -647,10 +647,18 @@ describe('tribeca test', () => {
         await connection.getLatestBlockhash()
       ).blockhash;
 
-      const tx = await sendAndConfirmTransaction(connection, transaction, [
+      await sendAndConfirmTransaction(connection, transaction, [
         payer.payer,
       ]).catch(err => {
-        expect(err.message).to.include('already in use');
+        if (err.message.includes('0xbc4')) {
+          console.log(
+            'Transaction failed as expected since it is already withdrawn, success'
+          );
+          return true;
+        } else {
+          console.error('Error instant withdrawing', err);
+          throw err;
+        }
       });
     } catch (err) {
       console.error('Error instant withdrawing', err);
