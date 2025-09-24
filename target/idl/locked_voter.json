@@ -622,6 +622,11 @@
           "isSigner": false
         },
         {
+          "name": "escrowOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "blacklist",
           "isMut": true,
           "isSigner": false,

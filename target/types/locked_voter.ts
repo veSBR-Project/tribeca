@@ -622,6 +622,11 @@ export type LockedVoter = {
           "isSigner": false
         },
         {
+          "name": "escrowOwner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "blacklist",
           "isMut": true,
           "isSigner": false,
@@ -2497,6 +2502,11 @@ export const IDL: LockedVoter = {
           "name": "escrow",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "escrowOwner",
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "blacklist",

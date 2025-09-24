@@ -559,6 +559,7 @@ describe('tribeca test', () => {
           USDC_MINT,
           redeemerReceiptAccount,
           ESCROW_PDA,
+          payer.publicKey,
           escrowTokenAccount,
           treasuryTokenAccount,
           userReceipt
@@ -572,6 +573,7 @@ describe('tribeca test', () => {
       ).blockhash;
 
       const tx = await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
         payer.payer,
       ]);
 
@@ -635,6 +637,7 @@ describe('tribeca test', () => {
           USDC_MINT,
           redeemerReceiptAccount,
           ESCROW_PDA,
+          payer.publicKey,
           escrowTokenAccount,
           treasuryTokenAccount,
           userReceipt
@@ -648,6 +651,7 @@ describe('tribeca test', () => {
       ).blockhash;
 
       await sendAndConfirmTransaction(connection, transaction, [
+        payer.payer,
         payer.payer,
       ]).catch(err => {
         if (err.message.includes('0xbc4')) {

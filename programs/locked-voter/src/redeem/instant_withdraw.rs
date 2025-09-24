@@ -21,9 +21,15 @@ pub struct InstantWithdraw<'info> {
         mut,
         close = payer,
         has_one = locker,
-        constraint = escrow.owner == payer.key(),
     )]
     pub escrow: Box<Account<'info, Escrow>>,
+
+    /// The [EscrowOwner].
+    #[account(
+        mut,
+        constraint = escrow.owner == escrow_owner.key(),
+    )]
+    pub escrow_owner: Signer<'info>,
 
     /// The [Blacklist].
     #[account(
@@ -162,14 +168,14 @@ impl<'info> InstantWithdraw<'info> {
         // update blacklist
         self.blacklist.locker = self.locker.key();
         self.blacklist.escrow = self.escrow.key();
-        self.blacklist.owner = self.payer.key();
+        self.blacklist.owner = self.escrow_owner.key();
         self.blacklist.timestamp = Clock::get()?.unix_timestamp;
 
         // Emit an event for the withdrawal
         emit!(InstantWithdrawEvent {
             locker: self.locker.key(),
             escrow: self.escrow.key(),
-            owner: self.payer.key(),
+            owner: self.escrow_owner.key(),
             amount: receipt_amount,
             timestamp: Clock::get()?.unix_timestamp
         });
